@@ -1,0 +1,17 @@
+global:
+  domain: argocd.dev.hdc.ebrains.eu
+
+redis:
+  enabled: true
+redis-ha:
+  enabled: false
+
+server:
+  service:
+    type: NodePort
+    nodePortHttps: 30443
+
+configs:
+  cm:
+    admin.enabled: "true"
+    url: https://argocd.dev.hdc.ebrains.eu
