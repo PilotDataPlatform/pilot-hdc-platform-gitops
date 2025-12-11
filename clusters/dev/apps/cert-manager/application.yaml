@@ -3,12 +3,14 @@ kind: Application
 metadata:
   name: cert-manager
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   project: default
   source:
     repoURL: https://github.com/PilotDataPlatform/pilot-hdc-platform-gitops.git
     path: clusters/dev/apps/cert-manager
-    targetRevision: HEAD
+    targetRevision: main
     helm:
       valueFiles:
         - values.yaml

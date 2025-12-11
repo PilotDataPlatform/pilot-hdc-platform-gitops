@@ -3,12 +3,14 @@ kind: Application
 metadata:
   name: ingress-nginx
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
   source:
     repoURL: https://github.com/PilotDataPlatform/pilot-hdc-platform-gitops.git
     path: clusters/dev/apps/ingress-nginx
-    targetRevision: HEAD
+    targetRevision: main
     helm:
       valueFiles:
         - values.yaml

@@ -5,12 +5,13 @@ ingress-nginx:
     service:
       type: NodePort
       nodePorts:
-        http: "30080"
-        https: "30443"
+        http: 30080
+        https: 30443
     config:
       use-forwarded-headers: "true"
       compute-full-forwarded-for: "true"
-      proxy-real-ip-cidr: "10.0.0.0/8"
+      # Trusted proxy subnet - update if OVH private network changes from 10.0.0.x
+      proxy-real-ip-cidr: "10.0.0.0/24"
     ingressClassResource:
       name: nginx
       enabled: true
