@@ -1,0 +1,29 @@
+ingress-nginx:
+  controller:
+    kind: Deployment
+    replicaCount: 2
+    service:
+      type: NodePort
+      nodePorts:
+        http: "30080"
+        https: "30443"
+    config:
+      use-forwarded-headers: "true"
+      compute-full-forwarded-for: "true"
+      proxy-real-ip-cidr: "10.0.0.0/8"
+    ingressClassResource:
+      name: nginx
+      enabled: true
+      default: true
+      controllerValue: k8s.io/ingress-nginx
+    resources:
+      requests:
+        cpu: 100m
+        memory: 90Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
+    nodeSelector:
+      kubernetes.io/os: linux
+    admissionWebhooks:
+      enabled: true

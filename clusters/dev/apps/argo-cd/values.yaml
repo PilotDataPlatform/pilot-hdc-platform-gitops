@@ -8,9 +8,19 @@ redis-ha:
 
 server:
   service:
-    type: NodePort
-    nodePortHttps: 30443
-    nodePortHttp: 30081
+    type: ClusterIP
+  ingress:
+    enabled: true
+    controller: generic
+    ingressClassName: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-dev
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    hostname: argocd.dev.hdc.ebrains.eu
+    path: /
+    pathType: Prefix
+    tls: true
 
 configs:
   cm:
