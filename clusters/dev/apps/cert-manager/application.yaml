@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/PilotDataPlatform/pilot-hdc-platform-gitops.git
+    path: clusters/dev/apps/cert-manager
+    targetRevision: main
+    helm:
+      valueFiles:
+        - values.yaml
+      valuesFrom:
+        - secretKeyRef:
+            name: cert-manager-values
+            key: values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cert-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

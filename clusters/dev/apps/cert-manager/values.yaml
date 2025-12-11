@@ -1,0 +1,12 @@
+cert-manager:
+  installCRDs: true
+  controller:
+    resourcesPreset: "nano"
+  webhook:
+    resourcesPreset: "nano"
+  cainjector:
+    resourcesPreset: "nano"
+
+# Placeholder - overridden by cert-manager-values secret via ArgoCD valuesFrom
+acme:
+  email: ""
