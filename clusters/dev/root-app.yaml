@@ -11,6 +11,7 @@ spec:
     targetRevision: main
     directory:
       recurse: true
+      exclude: "{**/templates/*,**/Chart.yaml,**/values.yaml}"
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
