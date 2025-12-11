@@ -1,6 +1,0 @@
-dependencies:
-- name: cert-manager
-  repository: https://pilotdataplatform.github.io/helm-charts/
-  version: v1.19.2
-digest: sha256:85611e6b2ca5446a5b8a03471d451dd478fb7ef1b5ab2a70d8ab7ef077083ba1
-generated: "2025-12-11T16:21:48.201576923+01:00"

@@ -1,28 +1,29 @@
-global:
-  domain: argocd.dev.hdc.ebrains.eu
+argo-cd:
+  global:
+    domain: argocd.dev.hdc.ebrains.eu
 
-redis:
-  enabled: true
-redis-ha:
-  enabled: false
-
-server:
-  service:
-    type: ClusterIP
-  ingress:
+  redis:
     enabled: true
-    controller: generic
-    ingressClassName: nginx
-    annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-prod
-      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-      nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    hostname: argocd.dev.hdc.ebrains.eu
-    path: /
-    pathType: Prefix
-    tls: true
+  redis-ha:
+    enabled: false
 
-configs:
-  cm:
-    admin.enabled: "true"
-    url: https://argocd.dev.hdc.ebrains.eu
+  server:
+    service:
+      type: ClusterIP
+    ingress:
+      enabled: true
+      controller: generic
+      ingressClassName: nginx
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      hostname: argocd.dev.hdc.ebrains.eu
+      path: /
+      pathType: Prefix
+      tls: true
+
+  configs:
+    cm:
+      admin.enabled: true
+      url: https://argocd.dev.hdc.ebrains.eu

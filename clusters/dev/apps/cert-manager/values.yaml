@@ -28,6 +28,3 @@ cert-manager:
       limits:
         cpu: 100m
         memory: 128Mi
-
-acme:
-  email: "acascais@indocresearch.org"
