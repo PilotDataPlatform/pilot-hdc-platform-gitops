@@ -1,5 +1,10 @@
 ingress-nginx:
   controller:
+    addHeaders:
+      X-Frame-Options: "SAMEORIGIN"
+      X-Content-Type-Options: "nosniff"
+      Referrer-Policy: "strict-origin-when-cross-origin"
+      Permissions-Policy: "geolocation=(), microphone=(), camera=()"
     kind: Deployment
     replicaCount: 2
     service:
@@ -8,6 +13,7 @@ ingress-nginx:
         http: 30080
         https: 30443
     config:
+      server-tokens: "false"
       use-forwarded-headers: "true"
       compute-full-forwarded-for: "true"
       # Trusted proxy subnet - update if OVH private network changes from 10.0.0.x
