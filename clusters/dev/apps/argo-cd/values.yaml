@@ -27,3 +27,10 @@ argo-cd:
     cm:
       admin.enabled: true
       url: https://argocd.dev.hdc.ebrains.eu
+      # Workaround for StatefulSet volumeClaimTemplates drift with ServerSideApply
+      # https://github.com/argoproj/argo-cd/issues/11143#issuecomment-3351076060
+      resource.customizations.ignoreDifferences.apps_StatefulSet: |
+        jqPathExpressions:
+          - .spec.volumeClaimTemplates[].apiVersion
+          - .spec.volumeClaimTemplates[].kind
+          - .spec.volumeClaimTemplates[].metadata.creationTimestamp
