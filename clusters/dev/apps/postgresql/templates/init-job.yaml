@@ -1,0 +1,153 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: postgresql-init-users
+  namespace: utility
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: OnFailure
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: init-users
+          image: docker-registry.ebrains.eu/hdc-services-external/bitnami/postgresql:16.3.0-debian-12-r19
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          env:
+            - name: PGHOST
+              value: postgres
+            - name: PGUSER
+              value: postgres
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-credentials
+                  key: postgres-password
+            - name: METADATA_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-credentials
+                  key: metadata-user-password
+            - name: PROJECT_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-credentials
+                  key: project-user-password
+            - name: AUTH_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-credentials
+                  key: auth-user-password
+            - name: DATAOPS_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-credentials
+                  key: dataops-user-password
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+
+              # Wait for postgres to be ready
+              until pg_isready -h $PGHOST -U $PGUSER; do
+                echo "Waiting for postgres..."
+                sleep 2
+              done
+
+              echo "Creating service users..."
+
+              # Use psql variables with quote_literal() for safe password handling
+              # This prevents SQL injection if passwords contain quotes or special chars
+
+              # metadata_user
+              psql -v ON_ERROR_STOP=1 -v pwd="$METADATA_USER_PASSWORD" <<'EOSQL'
+              SELECT 'CREATE USER metadata_user WITH PASSWORD ' || quote_literal(:'pwd')
+              WHERE NOT EXISTS (SELECT FROM pg_user WHERE usename = 'metadata_user') \gexec
+              SELECT 'ALTER USER metadata_user WITH PASSWORD ' || quote_literal(:'pwd')
+              WHERE EXISTS (SELECT FROM pg_user WHERE usename = 'metadata_user') \gexec
+              GRANT CONNECT ON DATABASE metadata TO metadata_user;
+              \c metadata
+              GRANT ALL PRIVILEGES ON SCHEMA metadata TO metadata_user;
+              GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA metadata TO metadata_user;
+              GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA metadata TO metadata_user;
+              ALTER DEFAULT PRIVILEGES IN SCHEMA metadata GRANT ALL ON TABLES TO metadata_user;
+              ALTER DEFAULT PRIVILEGES IN SCHEMA metadata GRANT ALL ON SEQUENCES TO metadata_user;
+              \c postgres
+              ALTER DATABASE metadata OWNER TO metadata_user;
+              EOSQL
+
+              # project_user
+              psql -v ON_ERROR_STOP=1 -v pwd="$PROJECT_USER_PASSWORD" <<'EOSQL'
+              SELECT 'CREATE USER project_user WITH PASSWORD ' || quote_literal(:'pwd')
+              WHERE NOT EXISTS (SELECT FROM pg_user WHERE usename = 'project_user') \gexec
+              SELECT 'ALTER USER project_user WITH PASSWORD ' || quote_literal(:'pwd')
+              WHERE EXISTS (SELECT FROM pg_user WHERE usename = 'project_user') \gexec
+              GRANT CONNECT ON DATABASE project TO project_user;
+              GRANT ALL PRIVILEGES ON DATABASE project TO project_user;
+              ALTER DATABASE project OWNER TO project_user;
+              EOSQL
+
+              # dataops_user
+              psql -v ON_ERROR_STOP=1 -v pwd="$DATAOPS_USER_PASSWORD" <<'EOSQL'
+              SELECT 'CREATE USER dataops_user WITH PASSWORD ' || quote_literal(:'pwd')
+              WHERE NOT EXISTS (SELECT FROM pg_user WHERE usename = 'dataops_user') \gexec
+              SELECT 'ALTER USER dataops_user WITH PASSWORD ' || quote_literal(:'pwd')
+              WHERE EXISTS (SELECT FROM pg_user WHERE usename = 'dataops_user') \gexec
+              GRANT CONNECT ON DATABASE dataops TO dataops_user;
+              GRANT ALL PRIVILEGES ON DATABASE dataops TO dataops_user;
+              ALTER DATABASE dataops OWNER TO dataops_user;
+              EOSQL
+
+              # auth_user
+              psql -v ON_ERROR_STOP=1 -v pwd="$AUTH_USER_PASSWORD" <<'EOSQL'
+              SELECT 'CREATE USER auth_user WITH PASSWORD ' || quote_literal(:'pwd')
+              WHERE NOT EXISTS (SELECT FROM pg_user WHERE usename = 'auth_user') \gexec
+              SELECT 'ALTER USER auth_user WITH PASSWORD ' || quote_literal(:'pwd')
+              WHERE EXISTS (SELECT FROM pg_user WHERE usename = 'auth_user') \gexec
+              GRANT CONNECT ON DATABASE auth TO auth_user;
+              \c auth
+              GRANT ALL PRIVILEGES ON SCHEMA pilot_invitation TO auth_user;
+              GRANT ALL PRIVILEGES ON SCHEMA pilot_casbin TO auth_user;
+              GRANT ALL PRIVILEGES ON SCHEMA pilot_event TO auth_user;
+              GRANT ALL PRIVILEGES ON SCHEMA pilot_ldap TO auth_user;
+              GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA pilot_invitation TO auth_user;
+              GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA pilot_casbin TO auth_user;
+              GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA pilot_event TO auth_user;
+              GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA pilot_ldap TO auth_user;
+              GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA pilot_invitation TO auth_user;
+              GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA pilot_casbin TO auth_user;
+              GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA pilot_event TO auth_user;
+              GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA pilot_ldap TO auth_user;
+              ALTER DEFAULT PRIVILEGES IN SCHEMA pilot_invitation GRANT ALL ON TABLES TO auth_user;
+              ALTER DEFAULT PRIVILEGES IN SCHEMA pilot_casbin GRANT ALL ON TABLES TO auth_user;
+              ALTER DEFAULT PRIVILEGES IN SCHEMA pilot_event GRANT ALL ON TABLES TO auth_user;
+              ALTER DEFAULT PRIVILEGES IN SCHEMA pilot_ldap GRANT ALL ON TABLES TO auth_user;
+              ALTER DEFAULT PRIVILEGES IN SCHEMA pilot_invitation GRANT ALL ON SEQUENCES TO auth_user;
+              ALTER DEFAULT PRIVILEGES IN SCHEMA pilot_casbin GRANT ALL ON SEQUENCES TO auth_user;
+              ALTER DEFAULT PRIVILEGES IN SCHEMA pilot_event GRANT ALL ON SEQUENCES TO auth_user;
+              ALTER DEFAULT PRIVILEGES IN SCHEMA pilot_ldap GRANT ALL ON SEQUENCES TO auth_user;
+              \c postgres
+              ALTER DATABASE auth OWNER TO auth_user;
+              EOSQL
+
+              echo "Service users created successfully!"

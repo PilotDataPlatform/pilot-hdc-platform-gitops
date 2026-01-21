@@ -1,0 +1,21 @@
+redis:
+  fullnameOverride: redis
+
+  architecture: standalone
+
+  auth:
+    existingSecret: redis-credentials
+    existingSecretPasswordKey: password
+
+  master:
+    persistence:
+      size: 1Gi
+      storageClass: "csi-cinder-high-speed"
+
+    resources:
+      limits:
+        memory: 256Mi
+        cpu: 500m
+      requests:
+        memory: 128Mi
+        cpu: 100m

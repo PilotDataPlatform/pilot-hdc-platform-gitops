@@ -1,0 +1,77 @@
+postgresql:
+  fullnameOverride: postgres
+
+  global:
+    postgresql:
+      auth:
+        existingSecret: postgresql-credentials
+        secretKeys:
+          adminPasswordKey: postgres-password
+
+  primary:
+    initdb:
+      scripts:
+        00-create-databases.sh: |
+          #!/bin/bash
+          set -e
+          export PGPASSWORD=$POSTGRES_PASSWORD
+
+          cat > /tmp/create_databases.sql <<'EOF'
+          -- Create databases (matching pilot-hdc-lite)
+          SELECT 'CREATE DATABASE project' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'project')\gexec
+          SELECT 'CREATE DATABASE notifications' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'notifications')\gexec
+          SELECT 'CREATE DATABASE metadata' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'metadata')\gexec
+          SELECT 'CREATE DATABASE dataops' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'dataops')\gexec
+          SELECT 'CREATE DATABASE dataset' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'dataset')\gexec
+          SELECT 'CREATE DATABASE approval' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'approval')\gexec
+          SELECT 'CREATE DATABASE auth' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'auth')\gexec
+
+          -- notifications schemas
+          \c notifications
+          CREATE SCHEMA IF NOT EXISTS notifications;
+          CREATE SCHEMA IF NOT EXISTS announcements;
+
+          -- metadata schemas + extensions
+          \c metadata
+          CREATE SCHEMA IF NOT EXISTS metadata;
+          CREATE EXTENSION IF NOT EXISTS ltree;
+          CREATE EXTENSION IF NOT EXISTS pg_cron;
+          SELECT cron.schedule('expire_REGISTERED_items', '0 */1 * * *', $$DELETE FROM metadata.items WHERE status='REGISTERED' AND last_updated_time < now() - interval '1 day'$$) WHERE NOT EXISTS (SELECT FROM cron.job WHERE jobname = 'expire_REGISTERED_items');
+          SELECT cron.schedule('expire_job_history', '0 3 */1 * *', $$DELETE FROM cron.job_run_details WHERE end_time < now() - interval '30 days'$$) WHERE NOT EXISTS (SELECT FROM cron.job WHERE jobname = 'expire_job_history');
+
+          -- dataset schemas
+          \c dataset
+          CREATE SCHEMA IF NOT EXISTS dataset;
+
+          -- approval schemas
+          \c approval
+          CREATE SCHEMA IF NOT EXISTS pilot_approval;
+
+          -- auth schemas
+          \c auth
+          CREATE SCHEMA IF NOT EXISTS pilot_invitation;
+          CREATE SCHEMA IF NOT EXISTS pilot_casbin;
+          CREATE SCHEMA IF NOT EXISTS pilot_event;
+          CREATE SCHEMA IF NOT EXISTS pilot_ldap;
+          EOF
+
+          psql -U postgres -f /tmp/create_databases.sql
+
+    extendedConfiguration: |
+      max_connections = 200
+      shared_buffers = 128MB
+      cron.database_name = 'metadata'
+
+    persistence:
+      size: 10Gi
+      storageClass: "csi-cinder-high-speed"
+
+    resources:
+      limits:
+        cpu: 1
+        memory: 512Mi
+      requests:
+        cpu: 20m
+        memory: 128Mi
+
+  postgresqlSharedPreloadLibraries: "pgaudit,pg_cron"
