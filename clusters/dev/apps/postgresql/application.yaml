@@ -5,14 +5,15 @@ metadata:
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "4"
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
     repoURL: https://github.com/PilotDataPlatform/pilot-hdc-platform-gitops.git
-    targetRevision: HEAD
+    targetRevision: main
     path: clusters/dev/apps/postgresql
+    helm:
+      valueFiles:
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: utility

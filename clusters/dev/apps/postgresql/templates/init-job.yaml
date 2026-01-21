@@ -68,10 +68,17 @@ spec:
             - |
               set -e
 
-              # Wait for postgres to be ready
-              until pg_isready -h $PGHOST -U $PGUSER; do
-                echo "Waiting for postgres..."
-                sleep 2
+              # Wait for postgres to be fully ready (not just accepting connections)
+              max_retries=60  # 60 × 10s = 10 min timeout
+              count=0
+              until psql -h "$PGHOST" -U "$PGUSER" -c 'SELECT 1' >/dev/null 2>&1; do
+                count=$((count + 1))
+                if [ $count -ge $max_retries ]; then
+                  echo "ERROR: PostgreSQL not ready after $max_retries attempts"
+                  exit 1
+                fi
+                echo "Waiting for postgres... ($count/$max_retries)"
+                sleep 10
               done
 
               echo "Creating service users..."
