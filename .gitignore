@@ -1,0 +1,3 @@
+# Helm dependencies (downloaded at build time)
+**/charts/
+**/Chart.lock
