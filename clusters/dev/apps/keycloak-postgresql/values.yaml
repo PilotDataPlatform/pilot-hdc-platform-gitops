@@ -2,6 +2,9 @@ postgresql:
   fullnameOverride: keycloak-postgresql
 
   global:
+    imageRegistry: docker-registry.ebrains.eu
+    imagePullSecrets:
+      - docker-registry-secret
     postgresql:
       auth:
         database: bitnami_keycloak
@@ -10,6 +13,9 @@ postgresql:
         secretKeys:
           adminPasswordKey: postgres-password
           userPasswordKey: password
+
+  image:
+    repository: hdc-services-external/bitnami/postgresql
 
   primary:
     persistence:

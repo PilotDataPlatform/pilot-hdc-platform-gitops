@@ -1,6 +1,14 @@
 redis:
   fullnameOverride: redis
 
+  global:
+    imageRegistry: docker-registry.ebrains.eu
+    imagePullSecrets:
+      - docker-registry-secret
+
+  image:
+    repository: hdc-services-external/bitnami/redis
+
   architecture: standalone
 
   auth:

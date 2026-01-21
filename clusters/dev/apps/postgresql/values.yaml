@@ -2,11 +2,18 @@ postgresql:
   fullnameOverride: postgres
 
   global:
+    imageRegistry: docker-registry.ebrains.eu
+    imagePullSecrets:
+      - docker-registry-secret
     postgresql:
       auth:
         existingSecret: postgresql-credentials
         secretKeys:
           adminPasswordKey: postgres-password
+
+  image:
+    repository: hdc-services-external/bitnami/postgresql
+    tag: 16.3.0-debian-12-r19
 
   primary:
     initdb:
