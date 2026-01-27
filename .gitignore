@@ -1,3 +1,6 @@
 # Helm dependencies (downloaded at build time)
 **/charts/
 **/Chart.lock
+
+# Local scripts
+scripts/

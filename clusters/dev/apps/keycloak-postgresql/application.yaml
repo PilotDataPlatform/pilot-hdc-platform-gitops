@@ -13,6 +13,7 @@ spec:
     path: clusters/dev/apps/keycloak-postgresql
     helm:
       valueFiles:
+        - ../../registry.yaml
         - values.yaml
   destination:
     server: https://kubernetes.default.svc

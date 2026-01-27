@@ -2,7 +2,6 @@ redis:
   fullnameOverride: redis
 
   global:
-    imageRegistry: docker-registry.ebrains.eu
     imagePullSecrets:
       - docker-registry-secret
 

@@ -1,7 +1,10 @@
 APPS_DIR := clusters/dev/apps
 APPS := postgresql keycloak-postgresql redis
+REGISTRY_DIR := clusters/dev
 
-.PHONY: helm-deps helm-test-eso test clean
+.PHONY: helm-deps helm-test-eso helm-test-image test clean switch-registry which-registry
+
+EXPECTED_REGISTRY := $(shell grep 'imageRegistry:' $(REGISTRY_DIR)/registry.yaml 2>/dev/null | awk '{print $$2}')
 
 # Build helm dependencies for all apps (skip repo refresh for speed)
 helm-deps:
@@ -15,7 +18,7 @@ helm-test-eso: helm-deps
 	@echo "Testing ExternalSecret template rendering..."
 	@failed=0; \
 	for app in $(APPS); do \
-		output=$$(helm template test $(APPS_DIR)/$$app --show-only templates/docker-registry-secret.yaml 2>&1); \
+		output=$$(helm template test $(APPS_DIR)/$$app -f $(REGISTRY_DIR)/registry.yaml --show-only templates/docker-registry-secret.yaml 2>&1); \
 		if echo "$$output" | grep -q '{{ .username }}' && \
 		   echo "$$output" | grep -q '{{ .password }}' && \
 		   echo "$$output" | grep -q '{{ printf "%s:%s" .username .password | b64enc }}'; then \
@@ -28,9 +31,37 @@ helm-test-eso: helm-deps
 	done; \
 	exit $$failed
 
-test: helm-test-eso
+# Test images use internal registry, not docker.io
+helm-test-image: helm-deps
+	@echo "Testing image registry..."
+	@failed=0; \
+	for app in $(APPS); do \
+		images=$$(helm template test $(APPS_DIR)/$$app -f $(REGISTRY_DIR)/registry.yaml 2>/dev/null | grep -E '^\s+image:' | awk '{print $$2}' | tr -d '"' | sort -u); \
+		for img in $$images; do \
+			if echo "$$img" | grep -q "^$(EXPECTED_REGISTRY)/"; then \
+				echo "✓ $$app: $$img"; \
+			else \
+				echo "✗ $$app: $$img (expected $(EXPECTED_REGISTRY))"; \
+				failed=1; \
+			fi; \
+		done; \
+	done; \
+	exit $$failed
+
+test: helm-test-eso helm-test-image
 
 clean:
 	@for app in $(APPS); do \
 		rm -rf $(APPS_DIR)/$$app/charts $(APPS_DIR)/$$app/Chart.lock; \
 	done
+
+# Registry switching: make switch-registry TO=ovh|ebrains
+switch-registry:
+	@test -n "$(TO)" || (echo "Usage: make switch-registry TO=ovh|ebrains" && exit 1)
+	@test -f $(REGISTRY_DIR)/registry-$(TO).yaml || (echo "No preset: $(REGISTRY_DIR)/registry-$(TO).yaml" && exit 1)
+	cp $(REGISTRY_DIR)/registry-$(TO).yaml $(REGISTRY_DIR)/registry.yaml
+	@echo "Switched to $(TO): $$(grep 'imageRegistry:' $(REGISTRY_DIR)/registry.yaml | awk '{print $$2}')"
+
+which-registry:
+	@echo "Active: $$(grep 'imageRegistry:' $(REGISTRY_DIR)/registry.yaml | awk '{print $$2}')"
+	@echo "Vault:  $$(grep 'registryVaultPath:' $(REGISTRY_DIR)/registry.yaml | awk '{print $$2}')"

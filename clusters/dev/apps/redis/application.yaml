@@ -13,6 +13,7 @@ spec:
     path: clusters/dev/apps/redis
     helm:
       valueFiles:
+        - ../../registry.yaml
         - values.yaml
   destination:
     server: https://kubernetes.default.svc
