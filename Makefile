@@ -1,5 +1,5 @@
 APPS_DIR := clusters/dev/apps
-APPS := postgresql keycloak-postgresql redis
+APPS := postgresql keycloak-postgresql redis keycloak
 REGISTRY_DIR := clusters/dev
 
 .PHONY: helm-deps helm-test-eso helm-test-image test clean switch-registry which-registry
