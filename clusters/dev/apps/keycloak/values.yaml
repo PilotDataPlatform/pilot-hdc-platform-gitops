@@ -38,7 +38,6 @@ keycloak:
         -Dkeycloak.profile.feature.token_exchange=enabled
         -Dkeycloak.adminUrl=https://iam.dev.hdc.ebrains.eu
         -Dkeycloak.frontendUrl=https://iam.dev.hdc.ebrains.eu
-        -Dnashorn.args=--no-deprecation-warning
 
   extraVolumes:
     - name: antd
@@ -54,9 +53,17 @@ keycloak:
       image: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-external/alpine:3.21
       imagePullPolicy: IfNotPresent
       securityContext:
+        # Root required to chown downloaded plugins to uid 1001 (keycloak)
         runAsUser: 0
         runAsGroup: 0
         allowPrivilegeEscalation: false
+      resources:
+        requests:
+          cpu: 100m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 128Mi
       volumeMounts:
         - mountPath: /opt/bitnami/keycloak/themes/keycloak-antd/
           name: antd
@@ -66,6 +73,7 @@ keycloak:
       command: ["/bin/sh", "-c"]
       args:
         - >
+          set -e;
           apk add --no-cache wget ca-certificates
           && mkdir -p /opt/bitnami/keycloak/themes/keycloak-antd/plugins
           && rm -fv /opt/bitnami/keycloak/themes/keycloak-antd/plugins/{keycloak-last-login,keycloak-auth-require-group}-*
