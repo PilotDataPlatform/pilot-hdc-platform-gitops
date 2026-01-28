@@ -1,5 +1,5 @@
 APPS_DIR := clusters/dev/apps
-APPS := postgresql keycloak-postgresql redis
+APPS := postgresql keycloak-postgresql redis keycloak
 REGISTRY_DIR := clusters/dev
 
 .PHONY: helm-deps helm-test-eso helm-test-image test clean switch-registry which-registry
@@ -59,8 +59,18 @@ clean:
 switch-registry:
 	@test -n "$(TO)" || (echo "Usage: make switch-registry TO=ovh|ebrains" && exit 1)
 	@test -f $(REGISTRY_DIR)/registry-$(TO).yaml || (echo "No preset: $(REGISTRY_DIR)/registry-$(TO).yaml" && exit 1)
+	$(eval OLD_REG := $(shell grep 'imageRegistry:' $(REGISTRY_DIR)/registry.yaml 2>/dev/null | awk '{print $$2}'))
+	$(eval NEW_REG := $(shell grep 'imageRegistry:' $(REGISTRY_DIR)/registry-$(TO).yaml | awk '{print $$2}'))
 	cp $(REGISTRY_DIR)/registry-$(TO).yaml $(REGISTRY_DIR)/registry.yaml
-	@echo "Switched to $(TO): $$(grep 'imageRegistry:' $(REGISTRY_DIR)/registry.yaml | awk '{print $$2}')"
+	@if [ "$(OLD_REG)" != "$(NEW_REG)" ]; then \
+		for app in $(APPS); do \
+			if grep -q '$(OLD_REG)' $(APPS_DIR)/$$app/values.yaml 2>/dev/null; then \
+				sed -i 's|$(OLD_REG)|$(NEW_REG)|g' $(APPS_DIR)/$$app/values.yaml; \
+				echo "  Updated $$app/values.yaml"; \
+			fi; \
+		done; \
+	fi
+	@echo "Switched to $(TO): $(NEW_REG)"
 
 which-registry:
 	@echo "Active: $$(grep 'imageRegistry:' $(REGISTRY_DIR)/registry.yaml | awk '{print $$2}')"
