@@ -5,7 +5,6 @@ keycloak:
 
   image:
     repository: hdc-services-external/bitnami/keycloak
-    tag: 20.0.5-debian-11-r4
 
   auth:
     existingSecret: keycloak-credentials

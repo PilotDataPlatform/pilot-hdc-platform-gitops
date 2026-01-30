@@ -2,7 +2,7 @@
 **/charts/
 **/Chart.lock
 
-# Local scripts
-scripts/
+# Local scripts (tracked scripts use scripts/ dir)
+scripts/*.local.*
 
 .gh-token
