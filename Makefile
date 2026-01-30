@@ -1,8 +1,9 @@
 APPS_DIR := clusters/dev/apps
 APPS := registry-secrets postgresql keycloak-postgresql redis keycloak auth
 REGISTRY_DIR := clusters/dev
+VERSIONS_FILE := clusters/dev/versions.yaml
 
-.PHONY: helm-deps helm-test-eso helm-test-image test clean switch-registry which-registry
+.PHONY: helm-deps helm-test-eso helm-test-image helm-test-versions sync-versions test clean switch-registry which-registry
 
 EXPECTED_REGISTRY := $(shell grep 'imageRegistry:' $(REGISTRY_DIR)/registry.yaml 2>/dev/null | awk '{print $$2}')
 
@@ -52,7 +53,38 @@ helm-test-image: helm-deps
 	done; \
 	exit $$failed
 
-test: helm-test-eso helm-test-image
+# Sync chart dependency versions from versions.yaml into each app's Chart.yaml
+# Chart.yaml versions can't be set via Helm values — they're read at `helm dependency build` time.
+# Workflow: bump version in versions.yaml → make sync-versions → commit both files.
+sync-versions:
+	@bash scripts/sync-chart-versions.sh
+
+# Verify image tags rendered by helm template match versions.yaml
+helm-test-versions: helm-deps
+	@echo "Testing image tags from versions.yaml..."
+	@failed=0; \
+	check_tag() { \
+		app=$$1; values_key=$$2; dir=$$3; \
+		expected=$$(yq ".\"$$values_key\".image.tag" $(VERSIONS_FILE)); \
+		rendered=$$(helm template test $(APPS_DIR)/$$dir \
+			-f $(REGISTRY_DIR)/registry.yaml \
+			-f $(VERSIONS_FILE) \
+			-f $(APPS_DIR)/$$dir/values.yaml \
+			--skip-tests 2>/dev/null \
+		| grep -E '^\s+image:' | sed 's/.*image:\s*"\{0,1\}\([^"]*\)"\{0,1\}/\1/' | grep -F "$${expected}" | head -1); \
+		if [ -n "$$rendered" ]; then \
+			echo "✓ $$app: tag $$expected found"; \
+		else \
+			echo "✗ $$app: expected tag $$expected not found in rendered output"; \
+			failed=1; \
+		fi; \
+	}; \
+	check_tag auth auth-service auth; \
+	check_tag postgresql postgresql postgresql; \
+	check_tag keycloak keycloak keycloak; \
+	exit $$failed
+
+test: helm-test-eso helm-test-image helm-test-versions
 
 clean:
 	@for app in $(APPS); do \
