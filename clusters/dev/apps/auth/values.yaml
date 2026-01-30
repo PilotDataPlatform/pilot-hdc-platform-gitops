@@ -1,0 +1,95 @@
+auth-service:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/auth
+    tag: "131"
+    pullPolicy: IfNotPresent
+
+  fullnameOverride: auth
+  replicaCount: 3
+
+  container:
+    port: 5061
+
+  service:
+    type: ClusterIP
+    port: 5061
+    targetPort: 5061
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  appConfig:
+    env: dev
+    WORKERS: 2
+    RDS_HOST: postgres.utility
+    RDS_USER: auth_user
+    RDS_DBNAME: auth
+    RDS_SCHEMA_PREFIX: pilot
+    IDENTITY_BACKEND: keycloak
+    KEYCLOAK_SERVER_URL: "https://iam.dev.hdc.ebrains.eu/"
+    KEYCLOAK_CLIENT_ID: kong
+    KEYCLOAK_REALM: hdc
+    KEYCLOAK_ID: hdc
+    REDIS_HOST: redis-master.redis
+    REDIS_PORT: "6379"
+    ENABLE_ACTIVE_DIRECTORY: "false"
+    DOMAIN_NAME: "https://portal.dev.hdc.ebrains.eu"
+    START_PATH: pilot
+    GUIDE_PATH: ""
+    EMAIL_SUPPORT: support@hdc.ebrains.eu
+    EMAIL_ADMIN: admin@hdc.ebrains.eu
+    EMAIL_HELPDESK: helpdesk@hdc.ebrains.eu
+    PLATFORM_NAME: HDC
+    PROJECT_NAME: HDC
+    OPEN_TELEMETRY_ENABLED: "false"
+    config_center_enabled: "false"
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 500Mi
+    requests:
+      cpu: 25m
+      memory: 10Mi
+
+  extraEnvYaml:
+    - name: RDS_PWD
+      valueFrom:
+        secretKeyRef:
+          name: auth-credentials
+          key: auth-user-password
+    - name: REDIS_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: auth-credentials
+          key: redis-password
+    - name: KEYCLOAK_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: auth-credentials
+          key: keycloak-client-secret
+
+  extraEnv:
+    REDIS_DB: "0"
+    RDS_PRE_PING: "true"
+
+  readinessProbe:
+    tcpSocket:
+      port: 5061
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    failureThreshold: 3
+
+  livenessProbe:
+    httpGet:
+      path: /v1/health
+      port: 5061
+    periodSeconds: 30
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0

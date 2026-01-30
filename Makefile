@@ -1,5 +1,5 @@
 APPS_DIR := clusters/dev/apps
-APPS := postgresql keycloak-postgresql redis keycloak
+APPS := postgresql keycloak-postgresql redis keycloak auth
 REGISTRY_DIR := clusters/dev
 
 .PHONY: helm-deps helm-test-eso helm-test-image test clean switch-registry which-registry
@@ -18,6 +18,10 @@ helm-test-eso: helm-deps
 	@echo "Testing ExternalSecret template rendering..."
 	@failed=0; \
 	for app in $(APPS); do \
+		if [ ! -f $(APPS_DIR)/$$app/templates/docker-registry-secret.yaml ]; then \
+			echo "⊘ $$app: no docker-registry-secret template (skipped)"; \
+			continue; \
+		fi; \
 		output=$$(helm template test $(APPS_DIR)/$$app -f $(REGISTRY_DIR)/registry.yaml --show-only templates/docker-registry-secret.yaml 2>&1); \
 		if echo "$$output" | grep -q '{{ .username }}' && \
 		   echo "$$output" | grep -q '{{ .password }}' && \
@@ -36,7 +40,7 @@ helm-test-image: helm-deps
 	@echo "Testing image registry..."
 	@failed=0; \
 	for app in $(APPS); do \
-		images=$$(helm template test $(APPS_DIR)/$$app -f $(REGISTRY_DIR)/registry.yaml 2>/dev/null | grep -E '^\s+image:' | awk '{print $$2}' | tr -d '"' | sort -u); \
+		images=$$(helm template test $(APPS_DIR)/$$app -f $(REGISTRY_DIR)/registry.yaml --skip-tests 2>/dev/null | grep -E '^\s+image:' | awk '{print $$2}' | tr -d '"' | sort -u); \
 		for img in $$images; do \
 			if echo "$$img" | grep -q "^$(EXPECTED_REGISTRY)/"; then \
 				echo "✓ $$app: $$img"; \

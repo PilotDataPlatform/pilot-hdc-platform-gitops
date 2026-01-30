@@ -1,0 +1,7 @@
+apiVersion: v2
+name: auth
+version: 0.1.0
+dependencies:
+  - name: auth-service
+    version: "1.0.9"
+    repository: https://pilotdataplatform.github.io/helm-charts/
