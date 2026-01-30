@@ -1,6 +1,28 @@
 # pilot-hdc-platform-gitops
 GitOps repository that contains all the related configuration to manage the Pilot-HDC kubernetes clusters
 
+## App-of-Apps Pattern
+
+This repo uses ArgoCD's app-of-apps pattern: a root Application (`root-app.yaml`) deploys all child Applications, each defined under `clusters/dev/apps/<name>/`.
+
+### Sync-Wave Order
+
+| Wave | App | Notes |
+|------|-----|-------|
+| 2 | external-secrets | Operator + CRDs |
+| 3 | vault | Deploys Vault server |
+| 3 | registry-secrets | ExternalSecrets for docker-registry-secret (utility, keycloak, redis) |
+| 4 | postgresql | |
+| 4 | keycloak-postgresql | |
+| 5 | redis | |
+| 6 | keycloak | |
+| 7 | auth | |
+
+**Note**: `registry-secrets` (wave 3) will show `SecretSyncError` until Vault is unsealed and the ClusterSecretStore can connect to it — expected on first deploy, resolves via `selfHeal: true`.
+
+### Prerequisites
+- Vault must be unsealed and initialized before apps in wave 3+ can sync
+
 ## Vault Bootstrap (One-Time)
 
 After ArgoCD deploys Vault, these manual steps are required once per cluster.
