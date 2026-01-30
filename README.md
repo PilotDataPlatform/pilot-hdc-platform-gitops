@@ -10,7 +10,7 @@ This repo uses ArgoCD's app-of-apps pattern: a root Application (`root-app.yaml`
 | Wave | App | Notes |
 |------|-----|-------|
 | 2 | external-secrets | Operator + CRDs |
-| 3 | vault | Deploys Vault + ClusterSecretStore |
+| 3 | vault | Deploys Vault server |
 | 3 | registry-secrets | ExternalSecrets for docker-registry-secret (utility, keycloak, redis) |
 | 4 | postgresql | |
 | 4 | keycloak-postgresql | |
@@ -18,7 +18,7 @@ This repo uses ArgoCD's app-of-apps pattern: a root Application (`root-app.yaml`
 | 6 | keycloak | |
 | 7 | auth | |
 
-**Note**: `registry-secrets` (wave 3) will show `SecretSyncError` until Vault's ClusterSecretStore is ready — expected on first deploy, resolves via `selfHeal: true`.
+**Note**: `registry-secrets` (wave 3) will show `SecretSyncError` until Vault is unsealed and the ClusterSecretStore can connect to it — expected on first deploy, resolves via `selfHeal: true`.
 
 ### Prerequisites
 - Vault must be unsealed and initialized before apps in wave 3+ can sync
