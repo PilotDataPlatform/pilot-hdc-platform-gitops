@@ -57,7 +57,7 @@ helm-test-image: helm-deps
 # Chart.yaml versions can't be set via Helm values — they're read at `helm dependency build` time.
 # Workflow: bump version in versions.yaml → make sync-versions → commit both files.
 sync-versions:
-	@scripts/sync-chart-versions.sh
+	@bash scripts/sync-chart-versions.sh
 
 # Verify image tags rendered by helm template match versions.yaml
 helm-test-versions: helm-deps
@@ -71,7 +71,7 @@ helm-test-versions: helm-deps
 			-f $(VERSIONS_FILE) \
 			-f $(APPS_DIR)/$$dir/values.yaml \
 			--skip-tests 2>/dev/null \
-		| grep -E '^\s+image:' | sed 's/.*image:\s*"\{0,1\}\([^"]*\)"\{0,1\}/\1/' | grep -F "$$expected" | head -1); \
+		| grep -E '^\s+image:' | sed 's/.*image:\s*"\{0,1\}\([^"]*\)"\{0,1\}/\1/' | grep -F "$${expected}" | head -1); \
 		if [ -n "$$rendered" ]; then \
 			echo "✓ $$app: tag $$expected found"; \
 		else \

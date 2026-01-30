@@ -55,5 +55,5 @@ done
 
 if [[ $changed -eq 1 ]]; then
   echo ""
-  echo "Chart versions updated. Run 'helm dependency build' to fetch new charts."
+  echo "Chart versions updated. Run 'make helm-deps' to fetch updated chart dependencies."
 fi
