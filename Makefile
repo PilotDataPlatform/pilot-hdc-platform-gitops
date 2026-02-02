@@ -1,5 +1,5 @@
 APPS_DIR := clusters/dev/apps
-APPS := registry-secrets postgresql keycloak-postgresql redis keycloak auth metadata
+APPS := registry-secrets postgresql keycloak-postgresql redis keycloak auth metadata project
 REGISTRY_DIR := clusters/dev
 VERSIONS_FILE := clusters/dev/versions.yaml
 
@@ -81,6 +81,7 @@ helm-test-versions: helm-deps
 	}; \
 	check_tag auth auth-service auth; \
 	check_tag metadata metadata-service metadata; \
+	check_tag project project-service project; \
 	check_tag postgresql postgresql postgresql; \
 	check_tag keycloak keycloak keycloak; \
 	exit $$failed

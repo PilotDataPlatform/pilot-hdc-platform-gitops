@@ -16,6 +16,7 @@ declare -A CHART_TO_DIRS=(
   [argo-cd]="argo-cd"
   [auth-service]="auth"
   [metadata-service]="metadata"
+  [project-service]="project"
   [cert-manager-jetstack]="cert-manager"
   [external-secrets]="external-secrets"
   [ingress-nginx]="ingress-nginx"

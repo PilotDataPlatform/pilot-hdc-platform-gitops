@@ -11,6 +11,10 @@ metadata-service:
   image:
     tag: "2.2.13"
 
+project-service:
+  image:
+    tag: "2.3.9"
+
 # -- Infrastructure image tags (manually managed) --
 postgresql:
   image:
@@ -27,6 +31,7 @@ charts:
   argo-cd: "9.1.7"
   auth-service: "1.0.9"
   metadata-service: "1.0.0"
+  project-service: "0.2.1"
   cert-manager-jetstack: "v1.19.2"
   external-secrets: "1.2.1"
   ingress-nginx: "4.14.1"
