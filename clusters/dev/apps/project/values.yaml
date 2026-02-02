@@ -1,0 +1,91 @@
+project-service:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/project
+    pullPolicy: IfNotPresent
+
+  fullnameOverride: project
+  replicaCount: 1
+
+  container:
+    port: 5064
+
+  service:
+    type: ClusterIP
+    port: 5064
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  appConfig:
+    port: 5064
+    env: dev
+    srv_namespace: service_project
+    config_center_enabled: false
+    config_center_base_url: http://common.utility:5062/
+
+  extraEnv:
+    APP_NAME: "project"
+    HOST: "0.0.0.0"
+    PORT: "5064"
+    WORKERS: "1"
+    RDS_DB_HOST: postgres.utility
+    RDS_DB_PORT: "5432"
+    RDS_DB_USERNAME: project_user
+    RDS_DB_NAME: project
+    RDS_ECHO_SQL_QUERIES: "false"
+    DCM_PROJECT_ID: generate_id
+    RUN_MIGRATIONS: "true"
+    AUTH_SERVICE: "http://auth.utility:5061"
+    METADATA_SERVICE: "http://metadata.utility:5066"
+    S3_HOST: minio.minio
+    S3_PORT: "9000"
+    S3_HTTPS_ENABLED: "false"
+    S3_GATEWAY_ENABLED: "false"
+    S3_BUCKET_ENCRYPTION_ENABLED: "false"
+    S3_BUCKET_FOR_PROJECT_LOGOS: project-logos
+    OBJECT_STORAGE_PROVIDER: S3
+    OPEN_TELEMETRY_ENABLED: "false"
+    LOG_LEVEL_DEFAULT: "30"
+    LOG_LEVEL_STDOUT: "30"
+    LOG_LEVEL_STDERR: "40"
+    SERVICE_CLIENT_TIMEOUT: "5"
+    ICON_SIZE_LIMIT: "16777216"
+
+  extraEnvYaml:
+    - name: OPSDB_UTILITY_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: project-credentials
+          key: project-user-password
+
+  resources:
+    limits:
+      cpu: "1"
+      memory: 500Mi
+    requests:
+      cpu: 10m
+      memory: 50Mi
+
+  readinessProbe:
+    failureThreshold: 3
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    successThreshold: 1
+    tcpSocket:
+      port: 5064
+
+  livenessProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /v1/health/
+      port: 5064
+      scheme: HTTP
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 3
+
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 33%
+    type: RollingUpdate
