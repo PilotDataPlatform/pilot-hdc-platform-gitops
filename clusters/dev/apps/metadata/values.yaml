@@ -1,0 +1,75 @@
+metadata-service:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/metadata
+    pullPolicy: IfNotPresent
+
+  fullnameOverride: metadata
+  replicaCount: 1
+
+  container:
+    port: 5066
+
+  service:
+    type: ClusterIP
+    port: 5066
+    targetPort: 5066
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  appConfig:
+    port: 5066
+    env: dev
+    srv_namespace: metadata
+    config_center_enabled: false
+    METADATA_SCHEMA: metadata
+    OPSDB_UTILITY_HOST: postgres.utility
+    OPSDB_UTILITY_PORT: "5432"
+    OPSDB_UTILITY_USERNAME: metadata_user
+
+  extraEnv:
+    DCM_PROJECT_ID: generate_id
+    RUN_MIGRATIONS: "true"
+    AUTH_HOST: "http://auth.utility:5061"
+    KAFKA_URL: ""
+    KAFKA_TOPIC: "metadata.items"
+    RSA_PUBLIC_KEY: "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUF0QTBrU0VwaW10VjA1WGlRcmFWQjlBZkRlTXFGWk9xM0ZTWE05Mk9sYjQ0R1ZHVmpjdXl2Z1V5YUNpNmIzM2E0cEdoanhvTTB4ZFVPaC9vQ0lFQURrN3E4QUo3UVdyZlNDcmd2Uk1uNkRTbkxCUFNHeFlpT3ZxMTVISDFFbGZrU1V1Ukg2TTdQSm9FZDZQRUQweXRXS3FNcXpiSFhFMEs2cEI3Y05vNmdCUjYwaHNjZ2FXVlhPMUtybDFEcVo5ZHVRME1CSXlIcitZU1pkRjhTUWdUOW5aK0psa2ZHbG41bGRkNEE1eUpBTElvRVlBbVVRbVJHRTI2VEhYeG5lL0xyWTk2ZnAzeGVEWlQwdDR3SFliZTVZektob09OazYwcitYeTN4QVJjQVFzbjk5S2kxSGNqMldLbzhZMjZqcTZValVZM0hwUGJQeDEwTTNqRVJKT2UxeHdJREFRQUIKLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t"
+
+  extraEnvYaml:
+    - name: OPSDB_UTILITY_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: metadata-credentials
+          key: metadata-user-password
+
+  resources:
+    limits:
+      cpu: "1"
+      memory: 500Mi
+    requests:
+      cpu: 10m
+      memory: 50Mi
+
+  readinessProbe:
+    failureThreshold: 3
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    successThreshold: 1
+    tcpSocket:
+      port: 5066
+
+  livenessProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /v1/health
+      port: 5066
+      scheme: HTTP
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 3
+
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 33%
+    type: RollingUpdate

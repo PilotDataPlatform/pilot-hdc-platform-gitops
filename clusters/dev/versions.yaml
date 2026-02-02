@@ -7,6 +7,10 @@ auth-service:
   image:
     tag: "2.2.32"
 
+metadata-service:
+  image:
+    tag: "2.2.13"
+
 # -- Infrastructure image tags (manually managed) --
 postgresql:
   image:
@@ -22,6 +26,7 @@ keycloak:
 charts:
   argo-cd: "9.1.7"
   auth-service: "1.0.9"
+  metadata-service: "1.0.0"
   cert-manager-jetstack: "v1.19.2"
   external-secrets: "1.2.1"
   ingress-nginx: "4.14.1"
