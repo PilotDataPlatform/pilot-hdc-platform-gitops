@@ -7,11 +7,11 @@ kafka:
   heapOpts: -Xms256M -Xmx256M
   deleteTopicEnable: true
 
-  replicaCount: 3
-  defaultReplicationFactor: 3
-  offsetsTopicReplicationFactor: 3
-  transactionStateLogReplicationFactor: 3
-  transactionStateLogMinIsr: 3
+  replicaCount: 1
+  defaultReplicationFactor: 1
+  offsetsTopicReplicationFactor: 1
+  transactionStateLogReplicationFactor: 1
+  transactionStateLogMinIsr: 1
 
   persistence:
     enabled: true
