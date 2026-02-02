@@ -29,7 +29,7 @@ metadata-service:
     DCM_PROJECT_ID: generate_id
     RUN_MIGRATIONS: "true"
     AUTH_HOST: "http://auth.utility:5061"
-    KAFKA_URL: ""
+    KAFKA_URL: "kafka.utility:9092"
     KAFKA_TOPIC: "metadata.items"
 
   extraEnv:

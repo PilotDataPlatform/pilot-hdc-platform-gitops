@@ -20,6 +20,7 @@ declare -A CHART_TO_DIRS=(
   [cert-manager-jetstack]="cert-manager"
   [external-secrets]="external-secrets"
   [ingress-nginx]="ingress-nginx"
+  [kafka]="kafka"
   [keycloak]="keycloak"
   [postgresql]="postgresql keycloak-postgresql"
   [redis]="redis"

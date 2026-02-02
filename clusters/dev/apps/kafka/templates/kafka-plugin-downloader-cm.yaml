@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-plugin-downloader
+  namespace: utility
+data:
+  kafka_plugin_downloader.sh: |
+    #!/bin/sh
+    cd /tmp
+    wget https://d1i4a15mxbxib1.cloudfront.net/api/plugins/confluentinc/kafka-connect-jdbc/versions/10.3.3/confluentinc-kafka-connect-jdbc-10.3.3.zip
+    wget https://d1i4a15mxbxib1.cloudfront.net/api/plugins/confluentinc/kafka-connect-elasticsearch/versions/11.1.8/confluentinc-kafka-connect-elasticsearch-11.1.8.zip
+    unzip confluentinc-kafka-connect-jdbc-10.3.3.zip
+    unzip confluentinc-kafka-connect-elasticsearch-11.1.8.zip
+    rm confluentinc-kafka-connect-jdbc-10.3.3.zip
+    rm confluentinc-kafka-connect-elasticsearch-11.1.8.zip
