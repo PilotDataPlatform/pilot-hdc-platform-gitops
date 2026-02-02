@@ -3,7 +3,7 @@ APPS := registry-secrets postgresql keycloak-postgresql redis kafka keycloak aut
 REGISTRY_DIR := clusters/dev
 VERSIONS_FILE := clusters/dev/versions.yaml
 
-.PHONY: helm-deps helm-test-eso helm-test-image helm-test-versions helm-test-envdup sync-versions test clean switch-registry which-registry
+.PHONY: helm-deps helm-test-eso helm-test-image helm-test-versions helm-test-envdup helm-test-pullsecrets sync-versions test clean switch-registry which-registry
 
 EXPECTED_REGISTRY := $(shell grep 'imageRegistry:' $(REGISTRY_DIR)/registry.yaml 2>/dev/null | awk '{print $$2}')
 
@@ -91,7 +91,12 @@ helm-test-envdup: helm-deps
 	@echo "Testing for duplicate env vars..."
 	@bash scripts/check-duplicate-env.sh $(APPS)
 
-test: helm-test-eso helm-test-image helm-test-versions helm-test-envdup
+# Ensure every pod spec has imagePullSecrets for private registry access
+helm-test-pullsecrets: helm-deps
+	@echo "Testing imagePullSecrets on all pod specs..."
+	@bash scripts/check-pull-secrets.sh $(APPS)
+
+test: helm-test-eso helm-test-image helm-test-versions helm-test-envdup helm-test-pullsecrets
 
 clean:
 	@for app in $(APPS); do \

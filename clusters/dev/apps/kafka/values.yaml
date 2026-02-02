@@ -49,6 +49,8 @@ kafka:
             labels: {{- include "common.labels.standard" . | nindent 8 }}
               app.kubernetes.io/component: connector
           spec:
+            imagePullSecrets:
+              - name: docker-registry-secret
             initContainers:
               - name: plugins-downloader
                 image: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-external/busybox:latest
