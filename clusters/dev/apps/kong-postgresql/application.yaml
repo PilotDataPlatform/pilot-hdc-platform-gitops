@@ -15,7 +15,10 @@ spec:
     helm:
       valueFiles:
         - ../../registry.yaml
-        - ../../versions.yaml
+        # TODO: versions.yaml has pg_cron tag for main utility postgres only.
+        # Proper fix: add postgresql-standard key to versions.yaml with standard
+        # bitnami tag, then reference it here. For now, using chart default.
+        # - ../../versions.yaml
         - values.yaml
   destination:
     server: https://kubernetes.default.svc
