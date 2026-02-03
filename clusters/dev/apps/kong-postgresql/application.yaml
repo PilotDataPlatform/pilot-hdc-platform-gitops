@@ -1,16 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: kong
+  name: kong-postgresql
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "9"
+    argocd.argoproj.io/sync-wave: "8"
+    # NO finalizer — StatefulSet with PVC
 spec:
   project: default
   source:
     repoURL: https://github.com/PilotDataPlatform/pilot-hdc-platform-gitops.git
     targetRevision: main
-    path: clusters/dev/apps/kong
+    path: clusters/dev/apps/kong-postgresql
     helm:
       valueFiles:
         - ../../registry.yaml

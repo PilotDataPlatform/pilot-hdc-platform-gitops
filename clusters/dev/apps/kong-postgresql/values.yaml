@@ -1,0 +1,32 @@
+postgresql:
+  fullnameOverride: kong-postgresql
+
+  global:
+    imagePullSecrets:
+      - docker-registry-secret
+    postgresql:
+      auth:
+        database: kong
+        username: kong
+        existingSecret: kong-postgresql-credentials
+        secretKeys:
+          adminPasswordKey: postgres-password
+          userPasswordKey: password
+
+  image:
+    repository: hdc-services-external/bitnami/postgresql
+
+  architecture: standalone
+
+  primary:
+    persistence:
+      size: 5Gi
+      storageClass: "csi-cinder-high-speed"
+
+    resources:
+      limits:
+        cpu: 500m
+        memory: 256Mi
+      requests:
+        cpu: 10m
+        memory: 64Mi
