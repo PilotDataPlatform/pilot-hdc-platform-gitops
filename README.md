@@ -11,12 +11,17 @@ This repo uses ArgoCD's app-of-apps pattern: a root Application (`root-app.yaml`
 |------|-----|-------|
 | 2 | external-secrets | Operator + CRDs |
 | 3 | vault | Deploys Vault server |
-| 3 | registry-secrets | ExternalSecrets for docker-registry-secret (utility, keycloak, redis) |
-| 4 | postgresql | |
-| 4 | keycloak-postgresql | |
+| 3 | registry-secrets | ExternalSecrets for docker-registry-secret |
+| 4 | postgresql | Main DB (utility ns) |
+| 4 | keycloak-postgresql | Keycloak DB |
 | 5 | redis | |
+| 5 | kafka | Broker + Zookeeper + Connect |
 | 6 | keycloak | |
 | 7 | auth | |
+| 8 | metadata | |
+| 8 | project | |
+| 8 | kong-postgresql | Kong DB (split from kong for PreSync hook) |
+| 9 | kong | API gateway |
 
 **Note**: `registry-secrets` (wave 3) will show `SecretSyncError` until Vault is unsealed and the ClusterSecretStore can connect to it — expected on first deploy, resolves via `selfHeal: true`.
 
