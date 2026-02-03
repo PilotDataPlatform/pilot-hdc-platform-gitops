@@ -1,5 +1,5 @@
 APPS_DIR := clusters/dev/apps
-APPS := registry-secrets postgresql keycloak-postgresql redis kafka keycloak auth metadata project
+APPS := registry-secrets postgresql keycloak-postgresql redis kafka keycloak auth metadata project kong
 REGISTRY_DIR := clusters/dev
 VERSIONS_FILE := clusters/dev/versions.yaml
 

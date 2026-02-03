@@ -25,6 +25,10 @@ keycloak:
     tag: "20.0.5-debian-11-r4"
 # Note: keycloak init container alpine:3.21 is hardcoded in keycloak/values.yaml
 
+kong:
+  image:
+    tag: "latest"
+
 # -- Chart dependency versions --
 # Synced to Chart.yaml via: make sync-versions
 charts:
@@ -39,4 +43,5 @@ charts:
   postgresql: "15.5.17"
   redis: "16.11.2"
   kafka: "20.0.3"
+  kong: "9.1.8"
   vault: "0.31.0"

@@ -1,0 +1,7 @@
+apiVersion: v2
+name: kong
+version: 0.1.0
+dependencies:
+  - name: kong
+    version: "9.1.8"
+    repository: https://pilotdataplatform.github.io/helm-charts/

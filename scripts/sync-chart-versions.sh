@@ -22,6 +22,7 @@ declare -A CHART_TO_DIRS=(
   [ingress-nginx]="ingress-nginx"
   [kafka]="kafka"
   [keycloak]="keycloak"
+  [kong]="kong"
   [postgresql]="postgresql keycloak-postgresql"
   [redis]="redis"
   [vault]="vault"
