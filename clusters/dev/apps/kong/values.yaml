@@ -54,6 +54,8 @@ kong:
         value: "debug"
       - name: KONG_PLUGINS
         value: "bundled,oidc"
+      - name: KONG_PG_DATABASE
+        value: "kong"
 
   service:
     exposeAdmin: true
