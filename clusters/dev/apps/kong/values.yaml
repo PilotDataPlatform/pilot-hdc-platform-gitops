@@ -1,9 +1,7 @@
 kong:
-  # Remove pre-upgrade hook - ArgoCD maps it to PreSync, causing deadlock
-  # (PostgreSQL only created after PreSync completes)
   migration:
     annotations:
-      helm.sh/hook: post-install
+      helm.sh/hook: post-install, pre-upgrade
       helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
 
   global:
@@ -17,6 +15,17 @@ kong:
 
   database: postgresql
   replicaCount: 1
+
+  # Disable bundled PostgreSQL — using external kong-postgresql app (wave 8)
+  postgresql:
+    enabled: false
+    external:
+      host: kong-postgresql
+      port: 5432
+      user: kong
+      database: kong
+      existingSecret: kong-postgresql-credentials
+      existingSecretPasswordKey: password
 
   ingress:
     enabled: true
@@ -38,24 +47,6 @@ kong:
 
   ingressController:
     enabled: false
-
-  postgresql:
-    enabled: true
-    image:
-      repository: hdc-services-external/bitnami/postgresql
-      tag: "16.3.0-debian-12-r19"
-    auth:
-      username: kong
-      database: kong
-      existingSecret: kong-postgresql-credentials
-      secretKeys:
-        adminPasswordKey: postgres-password
-        userPasswordKey: password
-    architecture: standalone
-    primary:
-      persistence:
-        enabled: true
-        size: 5Gi
 
   kong:
     extraEnvVars:

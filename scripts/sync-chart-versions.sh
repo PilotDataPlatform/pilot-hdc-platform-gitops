@@ -23,7 +23,7 @@ declare -A CHART_TO_DIRS=(
   [kafka]="kafka"
   [keycloak]="keycloak"
   [kong]="kong"
-  [postgresql]="postgresql keycloak-postgresql"
+  [postgresql]="postgresql keycloak-postgresql kong-postgresql"
   [redis]="redis"
   [vault]="vault"
 )
