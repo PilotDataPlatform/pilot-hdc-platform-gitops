@@ -51,17 +51,7 @@ kafka:
           spec:
             imagePullSecrets:
               - name: docker-registry-secret
-            initContainers:
-              - name: plugins-downloader
-                image: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-external/busybox:latest
-                imagePullPolicy: IfNotPresent
-                command: ["sh", "/scripts/kafka_plugin_downloader.sh"]
-                volumeMounts:
-                  - name: kafka-connect-plugins-dir
-                    mountPath: /tmp
-                  - name: plugin-downloader
-                    mountPath: /scripts/kafka_plugin_downloader.sh
-                    subPath: kafka_plugin_downloader.sh
+            # initContainers: plugins-downloader removed — add back when CDC/ES connectors needed
             containers:
               - name: connect
                 image: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-external/debezium/connect:1.1
@@ -91,10 +81,6 @@ kafka:
                   name: {{ include "kafka.name" . }}-connect
               - name: kafka-connect-plugins-dir
                 emptyDir: {}
-              - name: plugin-downloader
-                configMap:
-                  name: kafka-plugin-downloader
-                  defaultMode: 0777
     - |
       apiVersion: v1
       kind: ConfigMap
