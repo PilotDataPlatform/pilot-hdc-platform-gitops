@@ -1,4 +1,11 @@
 kong:
+  # Remove pre-upgrade hook - ArgoCD maps it to PreSync, causing deadlock
+  # (PostgreSQL only created after PreSync completes)
+  migration:
+    annotations:
+      helm.sh/hook: post-install
+      helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+
   global:
     imagePullSecrets:
       - docker-registry-secret
