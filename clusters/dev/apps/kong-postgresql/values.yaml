@@ -19,6 +19,10 @@ postgresql:
   architecture: standalone
 
   primary:
+    pgHbaConfiguration: |-
+      host all all all md5
+    extendedConfiguration: |-
+      password_encryption = md5
     persistence:
       size: 5Gi
       storageClass: "csi-cinder-high-speed"
