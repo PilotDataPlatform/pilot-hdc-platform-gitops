@@ -24,6 +24,7 @@ declare -A CHART_TO_DIRS=(
   [keycloak]="keycloak"
   [kong]="kong"
   [postgresql]="postgresql keycloak-postgresql kong-postgresql"
+  [minio]="minio"
   [redis]="redis"
   [vault]="vault"
 )

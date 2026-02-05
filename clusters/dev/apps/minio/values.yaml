@@ -1,0 +1,47 @@
+minio:
+  fullnameOverride: minio
+
+  global:
+    imagePullSecrets:
+      - docker-registry-secret
+
+  image:
+    repository: hdc-services-external/bitnami/minio
+    # tag from versions.yaml (2022.12.12-debian-11-r9)
+
+  mode: standalone
+
+  auth:
+    existingSecret: minio-credentials
+    # Chart expects keys: root-user, root-password
+
+  persistence:
+    enabled: true
+    storageClass: "csi-cinder-high-speed"
+    accessMode: ReadWriteOnce
+    size: 5Gi
+
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+
+  # No ingress - internal access only
+  ingress:
+    enabled: false
+  apiIngress:
+    enabled: false
+
+  service:
+    type: ClusterIP
+
+  # Encryption via built-in master key (no KES needed)
+  extraEnvVars:
+    - name: MINIO_KMS_SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: minio-credentials
+          key: kms-secret-key

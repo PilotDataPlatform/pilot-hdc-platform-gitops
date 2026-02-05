@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: minio
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/PilotDataPlatform/pilot-hdc-platform-gitops.git
+    targetRevision: main
+    path: clusters/dev/apps/minio
+    helm:
+      valueFiles:
+        - ../../registry.yaml
+        - ../../versions.yaml
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: minio
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

@@ -1,0 +1,7 @@
+apiVersion: v2
+name: minio
+version: 0.1.0
+dependencies:
+  - name: minio
+    version: "11.7.13"
+    repository: https://pilotdataplatform.github.io/helm-charts/

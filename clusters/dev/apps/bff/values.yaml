@@ -74,9 +74,9 @@ base-chart-hdc:
     SEARCH_SERVICE: "http://localhost:5064"
     WORKSPACE_SERVICE: "http://localhost:5068"
     PROVENANCE_SERVICE: "http://localhost:5077"
-    # MinIO not deployed
-    MINIO_HOST: "localhost:9000"
-    MINIO_BUCKET_ENCRYPTION: "false"
+    # MinIO
+    MINIO_HOST: "minio.minio:9000"
+    MINIO_BUCKET_ENCRYPTION: "true"
     S3_GATEWAY: "false"
     # Telemetry disabled
     OPEN_TELEMETRY_ENABLED: "false"
@@ -88,6 +88,16 @@ base-chart-hdc:
         secretKeyRef:
           name: bff-credentials
           key: redis-password
+    - name: MINIO_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: bff-credentials
+          key: minio-access-key
+    - name: MINIO_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: bff-credentials
+          key: minio-secret-key
 
   resources:
     requests:

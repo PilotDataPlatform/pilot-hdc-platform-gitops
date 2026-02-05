@@ -32,6 +32,10 @@ kong:
   image:
     tag: "latest"
 
+minio:
+  image:
+    tag: "2022.12.12-debian-11-r9"
+
 # -- Chart dependency versions --
 # Synced to Chart.yaml via: make sync-versions
 charts:
@@ -48,4 +52,5 @@ charts:
   redis: "16.11.2"
   kafka: "20.0.3"
   kong: "9.1.8"
+  minio: "11.7.13"
   vault: "0.31.0"
