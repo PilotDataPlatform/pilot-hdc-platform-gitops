@@ -1,7 +1,7 @@
 base-chart-hdc:
   image:
     repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/bff-web
-    tag: "2.2.74"
+    tag: "2.2.75"
     tagPrefix: "bff"
     pullPolicy: IfNotPresent
 

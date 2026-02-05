@@ -16,7 +16,7 @@ project-service:
     tag: "2.3.9"
 
 # Note: BFF uses base-chart-hdc which requires tag in values.yaml (image.tag + tagPrefix pattern)
-# Current: bff-web:bff-2.2.74
+# Current: bff-web:bff-2.2.75
 
 # -- Infrastructure image tags (manually managed) --
 postgresql:
