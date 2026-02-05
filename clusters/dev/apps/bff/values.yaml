@@ -1,0 +1,105 @@
+base-chart-hdc:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/bff-web
+    tag: "2.2.74"
+    tagPrefix: "bff"
+    pullPolicy: IfNotPresent
+
+  fullnameOverride: bff
+
+  labels:
+    app: bff
+    instance: bff-service
+
+  replicaCount: 1
+
+  container:
+    name: bff
+    ports:
+      - name: http
+        containerPort: 5060
+        protocol: TCP
+      - name: portal-bff
+        containerPort: 3000
+        protocol: TCP
+
+  service:
+    type: ClusterIP
+    ports:
+      - port: 5060
+        targetPort: 5060
+        protocol: TCP
+        name: http
+      - port: 3000
+        targetPort: 3000
+        protocol: TCP
+        name: portal-bff
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  appConfig:
+    env: dev
+    config_center_enabled: false
+
+  extraEnv:
+    # Platform config
+    SITE_DOMAIN: "https://portal.dev.hdc.ebrains.eu"
+    CORE_ZONE_LABEL: "Core"
+    GREENROOM_ZONE_LABEL: "Greenroom"
+    PROJECT_NAME: "HDC"
+    KEYCLOAK_REALM: "hdc"
+    KONG_PATH: "/pilot/"
+    RESOURCE_REQUEST_ADMIN: "admin"
+    EMAIL_SUPPORT: "support@hdc.ebrains.eu"
+    EMAIL_ADMIN: "admin@hdc.ebrains.eu"
+    EMAIL_HELPDESK: "helpdesk@hdc.ebrains.eu"
+    INVITATION_URL_LOGIN: "https://portal.dev.hdc.ebrains.eu/login/"
+    # Redis
+    REDIS_HOST: "redis-master.redis"
+    REDIS_PORT: "6379"
+    # Deployed services
+    AUTH_SERVICE: "http://auth.utility:5061"
+    METADATA_SERVICE: "http://metadata.utility:5066"
+    PROJECT_SERVICE: "http://project.utility:5064"
+    # Undeployed services - localhost placeholders
+    DATAOPS_SERVICE: "http://localhost:5063"
+    UPLOAD_SERVICE: "http://localhost:5079"
+    DOWNLOAD_SERVICE_CORE: "http://localhost:5077"
+    DOWNLOAD_SERVICE_GR: "http://localhost:5077"
+    NOTIFY_SERVICE: "http://localhost:5065"
+    DATASET_SERVICE: "http://localhost:5081"
+    KG_SERVICE: "http://localhost:8000"
+    APPROVAL_SERVICE: "http://localhost:8000"
+    SEARCH_SERVICE: "http://localhost:5064"
+    WORKSPACE_SERVICE: "http://localhost:5068"
+    PROVENANCE_SERVICE: "http://localhost:5077"
+    # MinIO not deployed
+    MINIO_HOST: "localhost:9000"
+    MINIO_BUCKET_ENCRYPTION: "false"
+    S3_GATEWAY: "false"
+    # Telemetry disabled
+    OPEN_TELEMETRY_ENABLED: "false"
+    ENABLE_PROMETHEUS_METRICS: "false"
+
+  extraEnvYaml:
+    - name: REDIS_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: bff-credentials
+          key: redis-password
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 200Mi
+    limits:
+      cpu: 500m
+      memory: 500Mi
+
+  readinessProbe:
+    tcpSocket:
+      port: 5060
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    failureThreshold: 3
