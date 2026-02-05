@@ -15,6 +15,9 @@ project-service:
   image:
     tag: "2.3.9"
 
+# Note: BFF uses base-chart-hdc which requires tag in values.yaml (image.tag + tagPrefix pattern)
+# Current: bff-web:bff-2.2.74
+
 # -- Infrastructure image tags (manually managed) --
 postgresql:
   image:
@@ -34,6 +37,7 @@ kong:
 charts:
   argo-cd: "9.1.7"
   auth-service: "1.0.9"
+  base-chart-hdc: "1.0.1"
   metadata-service: "1.0.0"
   project-service: "0.2.1"
   cert-manager-jetstack: "v1.19.2"
