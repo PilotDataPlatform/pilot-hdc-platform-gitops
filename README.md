@@ -16,12 +16,14 @@ This repo uses ArgoCD's app-of-apps pattern: a root Application (`root-app.yaml`
 | 4 | keycloak-postgresql | Keycloak DB |
 | 5 | redis | |
 | 5 | kafka | Broker + Zookeeper + Connect |
+| 5 | minio | Object storage with built-in encryption |
 | 6 | keycloak | |
 | 7 | auth | |
 | 8 | metadata | |
 | 8 | project | |
 | 8 | kong-postgresql | Kong DB (split from kong for PreSync hook) |
 | 9 | kong | API gateway |
+| 10 | bff | Backend-for-frontend |
 
 **Note**: `registry-secrets` (wave 3) will show `SecretSyncError` until Vault is unsealed and the ClusterSecretStore can connect to it — expected on first deploy, resolves via `selfHeal: true`.
 
@@ -90,6 +92,34 @@ vault kv put secret/test foo=bar
 # Check ESO synced it (ClusterSecretStore "vault" is pre-configured)
 kubectl get externalsecret -A
 ```
+
+## Required Vault Secrets
+
+These secrets must exist in Vault before the corresponding apps can sync.
+
+### MinIO (`secret/minio`)
+
+```bash
+# Generate 256-bit encryption key
+ENCRYPTION_KEY=$(openssl rand -base64 32)
+
+vault kv put secret/minio \
+  access_key="minio-admin" \
+  secret_key="$(openssl rand -hex 16)" \
+  kms_secret_key="minio-encryption-key:${ENCRYPTION_KEY}"
+```
+
+**Important**: Back up `kms_secret_key` - losing it means losing access to encrypted data.
+
+### Other Secrets
+
+| Path | Keys | Used By |
+|------|------|---------|
+| `secret/postgresql` | postgres-password, {metadata,project,auth,dataops}-user-password | postgresql init-job |
+| `secret/keycloak` | admin-password, postgres-password | keycloak |
+| `secret/redis` | password | redis, bff |
+| `secret/auth` | keycloak-client-secret | auth service |
+| `secret/docker-registry/ovh` | username, password | registry-secrets |
 
 ## Acknowledgements
 The development of the HealthDataCloud open source software was supported by the EBRAINS research infrastructure, funded from the European Union's Horizon 2020 Framework Programme for Research and Innovation under the Specific Grant Agreement No. 945539 (Human Brain Project SGA3) and H2020 Research and Innovation Action Grant Interactive Computing E-Infrastructure for the Human Brain Project ICEI 800858.
