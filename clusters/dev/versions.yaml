@@ -15,6 +15,10 @@ project-service:
   image:
     tag: "2.3.9"
 
+portal:
+  image:
+    tag: "1.6.3-hdc-ovh-dev"
+
 # Note: BFF uses base-chart-hdc which requires tag in values.yaml (image.tag + tagPrefix pattern)
 # Current: bff-web:bff-2.2.75
 
@@ -53,4 +57,5 @@ charts:
   kafka: "20.0.3"
   kong: "9.1.8"
   minio: "11.7.13"
+  portal: "2.1.2"
   vault: "0.31.0"

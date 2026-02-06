@@ -1,0 +1,55 @@
+portal:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/portal
+    pullPolicy: IfNotPresent
+    # tag from versions.yaml via valueFile merge
+
+  fullnameOverride: portal
+  replicaCount: 1
+
+  container:
+    port: 80
+
+  service:
+    type: ClusterIP
+    port: 3000
+    targetPort: 80
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  # REACT_APP_* vars are build-time — baked into the JS bundle during docker build.
+  # Container env vars from appConfig are irrelevant at runtime (nginx serves static files).
+  appConfig:
+    env: dev
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 500Mi
+
+  readinessProbe:
+    tcpSocket:
+      port: 80
+    initialDelaySeconds: 5
+    periodSeconds: 10
+
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/proxy-body-size: 20m
+    tls: true
+    hostname: dev.hdc.ebrains.eu
+    path: /
+    pathType: Prefix
+
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0

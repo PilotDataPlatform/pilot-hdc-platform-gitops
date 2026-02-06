@@ -1,5 +1,5 @@
 APPS_DIR := clusters/dev/apps
-APPS := registry-secrets postgresql keycloak-postgresql kong-postgresql redis kafka keycloak auth metadata project kong
+APPS := registry-secrets postgresql keycloak-postgresql kong-postgresql redis kafka keycloak auth metadata project kong bff minio portal
 REGISTRY_DIR := clusters/dev
 VERSIONS_FILE := clusters/dev/versions.yaml
 
@@ -84,6 +84,7 @@ helm-test-versions: helm-deps
 	check_tag project project-service project; \
 	check_tag postgresql postgresql postgresql; \
 	check_tag keycloak keycloak keycloak; \
+	check_tag portal portal portal; \
 	exit $$failed
 
 # Detect duplicate env var names that ServerSideApply would reject

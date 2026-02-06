@@ -1,0 +1,7 @@
+apiVersion: v2
+name: portal
+version: 0.1.0
+dependencies:
+  - name: portal
+    version: "2.1.2"
+    repository: https://pilotdataplatform.github.io/helm-charts/
