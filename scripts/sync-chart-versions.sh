@@ -17,6 +17,7 @@ declare -A CHART_TO_DIRS=(
   [auth-service]="auth"
   [metadata-service]="metadata"
   [project-service]="project"
+  [dataops-service]="dataops"
   [cert-manager-jetstack]="cert-manager"
   [external-secrets]="external-secrets"
   [ingress-nginx]="ingress-nginx"

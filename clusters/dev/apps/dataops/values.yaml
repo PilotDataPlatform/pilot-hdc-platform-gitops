@@ -1,0 +1,84 @@
+dataops-service:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/dataops
+    pullPolicy: IfNotPresent
+    # tag comes from versions.yaml via valueFile merge
+
+  fullnameOverride: dataops
+  replicaCount: 1
+
+  container:
+    port: 5063
+
+  service:
+    type: ClusterIP
+    port: 5063
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  appConfig:
+    env: dev
+    config_center_enabled: "false"
+    config_center_base_url: ""
+
+  extraEnv:
+    HOST: "0.0.0.0"
+    RDS_HOST: "postgres.utility"
+    RDS_PORT: "5432"
+    RDS_NAME: "dataops"
+    RDS_USERNAME: "dataops_user"
+    RDS_SCHEMA: "public"
+    RDS_ECHO_SQL_QUERIES: "false"
+    REDIS_HOST: "redis-master.redis"
+    REDIS_PORT: "6379"
+    REDIS_DB: "0"
+    WORKERS: "2"
+    LINEAGE_SERVICE: "http://lineage.utility:5064"
+    QUEUE_SERVICE: "http://queue-producer.greenroom:6060"
+    METADATA_SERVICE: "http://metadata.utility:5066"
+    AUTH_SERVICE: "http://auth.utility:5061"
+    MINIO_HOST: "http://minio.minio"
+    MINIO_PORT: "9000"
+    RSA_PUBLIC_KEY: "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUF0QTBrU0VwaW10VjA1WGlRcmFWQjlBZkRlTXFGWk9xM0ZTWE05Mk9sYjQ0R1ZHVmpjdXl2Z1V5YUNpNmIzM2E0cEdoanhvTTB4ZFVPaC9vQ0lFQURrN3E4QUo3UVdyZlNDcmd2Uk1uNkRTbkxCUFNHeFlpT3ZxMTVISDFFbGZrU1V1Ukg2TTdQSm9FZDZQRUQweXRXS3FNcXpiSFhFMEs2cEI3Y05vNmdCUjYwaHNjZ2FXVlhPMUtybDFEcVo5ZHVRME1CSXlIcitZU1pkRjhTUWdUOW5aK0psa2ZHbG41bGRkNEE1eUpBTElvRVlBbVVRbVJHRTI2VEhYeG5lL0xyWTk2ZnAzeGVEWlQwdDR3SFliZTVZektob09OazYwcitYeTN4QVJjQVFzbjk5S2kxSGNqMldLbzhZMjZqcTZValVZM0hwUGJQeDEwTTNqRVJKT2UxeHdJREFRQUIKLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0t"
+
+  extraEnvYaml:
+    - name: RDS_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: dataops-credentials
+          key: rds-password
+    - name: REDIS_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: dataops-credentials
+          key: redis-password
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      cpu: 500m
+      memory: 500Mi
+
+  readinessProbe:
+    tcpSocket:
+      port: 5063
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    failureThreshold: 3
+
+  livenessProbe:
+    httpGet:
+      path: /v1/health
+      port: 5063
+    periodSeconds: 30
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
