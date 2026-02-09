@@ -42,6 +42,9 @@ keycloak:
     - name: antd
       persistentVolumeClaim:
         claimName: keycloak-antd
+    - name: theme-cm
+      configMap:
+        name: keycloak-antd-theme
 
   extraVolumeMounts:
     - name: antd
@@ -66,6 +69,8 @@ keycloak:
       volumeMounts:
         - mountPath: /opt/bitnami/keycloak/themes/keycloak-antd/
           name: antd
+        - mountPath: /tmp/theme
+          name: theme-cm
       envFrom:
         - secretRef:
             name: github-access-token
@@ -73,16 +78,36 @@ keycloak:
       args:
         - >
           set -e;
-          apk add --no-cache wget ca-certificates
-          && mkdir -p /opt/bitnami/keycloak/themes/keycloak-antd/plugins
-          && rm -fv /opt/bitnami/keycloak/themes/keycloak-antd/plugins/{keycloak-last-login,keycloak-auth-require-group}-*
-          && wget --header "Authorization: token $GITHUB_TOKEN"
+          THEME_DIR=/opt/bitnami/keycloak/themes/keycloak-antd;
+          echo "=== Installing theme files ===" &&
+          mkdir -p $THEME_DIR/login/resources/css
+                   $THEME_DIR/login/resources/js
+                   $THEME_DIR/login/resources/img &&
+          cp /tmp/theme/login.ftl $THEME_DIR/login/ &&
+          cp /tmp/theme/template.ftl $THEME_DIR/login/ &&
+          cp /tmp/theme/theme.properties $THEME_DIR/login/ &&
+          cp /tmp/theme/login.css $THEME_DIR/login/resources/css/ &&
+          cp /tmp/theme/jquery.min.js $THEME_DIR/login/resources/js/ &&
+          cp /tmp/theme/login.js $THEME_DIR/login/resources/js/ &&
+          cp /tmp/theme/error.png /tmp/theme/favicon.ico
+             /tmp/theme/feedback-error-arrow-down.png /tmp/theme/feedback-error-sign.png
+             /tmp/theme/feedback-success-arrow-down.png /tmp/theme/feedback-success-sign.png
+             /tmp/theme/feedback-warning-arrow-down.png /tmp/theme/feedback-warning-sign.png
+             /tmp/theme/HDC-logo.png /tmp/theme/keycloak-bg.png
+             /tmp/theme/keycloak-logo.png /tmp/theme/keycloak-logo-text.png
+             /tmp/theme/lock.png /tmp/theme/user.png
+             $THEME_DIR/login/resources/img/ &&
+          echo "=== Downloading plugins ===" &&
+          apk add --no-cache wget ca-certificates &&
+          mkdir -p $THEME_DIR/plugins &&
+          rm -fv $THEME_DIR/plugins/{keycloak-last-login,keycloak-auth-require-group}-* &&
+          wget --header "Authorization: token $GITHUB_TOKEN"
           https://maven.pkg.github.com/PilotDataPlatform/keycloak-extensions/org/indocresearch/pilot/keycloak-last-login/1.0.1/keycloak-last-login-1.0.1.jar
-          -P /opt/bitnami/keycloak/themes/keycloak-antd/plugins
-          && wget --header "Authorization: token $GITHUB_TOKEN"
+          -P $THEME_DIR/plugins &&
+          wget --header "Authorization: token $GITHUB_TOKEN"
           https://maven.pkg.github.com/PilotDataPlatform/keycloak-extensions/com/github/thomasdarimont/keycloak/keycloak-auth-require-group/1.0.0/keycloak-auth-require-group-1.0.0.jar
-          -P /opt/bitnami/keycloak/themes/keycloak-antd/plugins
-          && chown -R 1001:1001 /opt/bitnami/keycloak/themes/keycloak-antd/plugins
+          -P $THEME_DIR/plugins &&
+          chown -R 1001:1001 $THEME_DIR
 
   initdbScripts:
     move_plugins.sh: |

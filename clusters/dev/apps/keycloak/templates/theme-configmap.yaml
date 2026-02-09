@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-antd-theme
+  namespace: keycloak
+data:
+  login.ftl: |
+{{ .Files.Get "theme/login/login.ftl" | indent 4 }}
+  template.ftl: |
+{{ .Files.Get "theme/login/template.ftl" | indent 4 }}
+  theme.properties: |
+{{ .Files.Get "theme/login/theme.properties" | indent 4 }}
+  login.css: |
+{{ .Files.Get "theme/login/resources/css/login.css" | indent 4 }}
+  jquery.min.js: |
+{{ .Files.Get "theme/login/resources/js/jquery.min.js" | indent 4 }}
+  login.js: |
+{{ .Files.Get "theme/login/resources/js/login.js" | indent 4 }}
+binaryData:
+  error.png: {{ .Files.Get "theme/login/resources/img/error.png" | b64enc | quote }}
+  favicon.ico: {{ .Files.Get "theme/login/resources/img/favicon.ico" | b64enc | quote }}
+  feedback-error-arrow-down.png: {{ .Files.Get "theme/login/resources/img/feedback-error-arrow-down.png" | b64enc | quote }}
+  feedback-error-sign.png: {{ .Files.Get "theme/login/resources/img/feedback-error-sign.png" | b64enc | quote }}
+  feedback-success-arrow-down.png: {{ .Files.Get "theme/login/resources/img/feedback-success-arrow-down.png" | b64enc | quote }}
+  feedback-success-sign.png: {{ .Files.Get "theme/login/resources/img/feedback-success-sign.png" | b64enc | quote }}
+  feedback-warning-arrow-down.png: {{ .Files.Get "theme/login/resources/img/feedback-warning-arrow-down.png" | b64enc | quote }}
+  feedback-warning-sign.png: {{ .Files.Get "theme/login/resources/img/feedback-warning-sign.png" | b64enc | quote }}
+  HDC-logo.png: {{ .Files.Get "theme/login/resources/img/HDC-logo.png" | b64enc | quote }}
+  keycloak-bg.png: {{ .Files.Get "theme/login/resources/img/keycloak-bg.png" | b64enc | quote }}
+  keycloak-logo.png: {{ .Files.Get "theme/login/resources/img/keycloak-logo.png" | b64enc | quote }}
+  keycloak-logo-text.png: {{ .Files.Get "theme/login/resources/img/keycloak-logo-text.png" | b64enc | quote }}
+  lock.png: {{ .Files.Get "theme/login/resources/img/lock.png" | b64enc | quote }}
+  user.png: {{ .Files.Get "theme/login/resources/img/user.png" | b64enc | quote }}
