@@ -15,6 +15,10 @@ project-service:
   image:
     tag: "2.3.9"
 
+dataops-service:
+  image:
+    tag: "2.5.8"
+
 portal:
   image:
     tag: "1.6.3-hdc-ovh-dev"
@@ -48,6 +52,7 @@ charts:
   base-chart-hdc: "1.0.1"
   metadata-service: "1.0.0"
   project-service: "0.2.1"
+  dataops-service: "0.2.1"
   cert-manager-jetstack: "v1.19.2"
   external-secrets: "1.2.1"
   ingress-nginx: "4.14.1"
