@@ -100,7 +100,7 @@ keycloak:
           echo "=== Downloading plugins ===" &&
           apk add --no-cache wget ca-certificates &&
           mkdir -p $THEME_DIR/plugins &&
-          rm -fv $THEME_DIR/plugins/{keycloak-last-login,keycloak-auth-require-group}-* &&
+          rm -fv $THEME_DIR/plugins/keycloak-last-login-* $THEME_DIR/plugins/keycloak-auth-require-group-* &&
           wget --header "Authorization: token $GITHUB_TOKEN"
           https://maven.pkg.github.com/PilotDataPlatform/keycloak-extensions/org/indocresearch/pilot/keycloak-last-login/1.0.1/keycloak-last-login-1.0.1.jar
           -P $THEME_DIR/plugins &&
