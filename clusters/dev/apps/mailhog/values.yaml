@@ -1,0 +1,24 @@
+mailhog:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-external/mailhog
+    # tag defaults to chart appVersion (v1.0.1)
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  service:
+    type: ClusterIP
+    port:
+      http: 8025
+      smtp: 1025
+
+  ingress:
+    enabled: false
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 64Mi

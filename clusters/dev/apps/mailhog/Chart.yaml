@@ -1,0 +1,7 @@
+apiVersion: v2
+name: mailhog
+version: 0.1.0
+dependencies:
+  - name: mailhog
+    version: "5.0.7"
+    repository: https://pilotdataplatform.github.io/helm-charts/

@@ -27,6 +27,7 @@ postgresql:
           SELECT 'CREATE DATABASE metadata' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'metadata')\gexec
           SELECT 'CREATE DATABASE dataops' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'dataops')\gexec
           SELECT 'CREATE DATABASE auth' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'auth')\gexec
+          SELECT 'CREATE DATABASE notifications' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'notifications')\gexec
 
           -- metadata schemas + extensions
           \c metadata
