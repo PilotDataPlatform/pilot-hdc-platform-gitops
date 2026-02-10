@@ -30,6 +30,7 @@ declare -A CHART_TO_DIRS=(
   [approval-service]="approval"
   [minio]="minio"
   [portal]="portal"
+  [rabbitmq]="message-bus-greenroom"
   [redis]="redis"
   [vault]="vault"
 )

@@ -1,0 +1,7 @@
+apiVersion: v2
+name: message-bus-greenroom
+version: 0.1.0
+dependencies:
+  - name: rabbitmq
+    version: "10.1.12"
+    repository: https://pilotdataplatform.github.io/helm-charts/

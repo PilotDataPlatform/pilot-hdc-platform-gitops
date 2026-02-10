@@ -66,6 +66,7 @@ charts:
   ingress-nginx: "4.14.1"
   keycloak: "13.2.0"
   postgresql: "15.5.17"
+  rabbitmq: "10.1.12"
   redis: "16.11.2"
   kafka: "20.0.3"
   kong: "9.1.8"
