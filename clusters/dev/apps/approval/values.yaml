@@ -1,0 +1,88 @@
+approval-service:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/approval
+    pullPolicy: IfNotPresent
+    # tag from versions.yaml via valueFile merge
+
+  fullnameOverride: approval
+  replicaCount: 1
+
+  container:
+    port: 8000
+
+  service:
+    type: ClusterIP
+    port: 8000
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  appConfig:
+    env: dev
+    config_center_enabled: "false"
+    config_center_base_url: "http://common.utility:5062/"
+
+  extraEnv:
+    CORE_ZONE_LABEL: "Core"
+    GREENROOM_ZONE_LABEL: "Greenroom"
+    META_SERVICE: "http://metadata.utility:5066"
+    RDS_SCHEMA_DEFAULT: "pilot_approval"
+    AUTH_SERVICE: "http://auth.utility:5061"
+    DATAOPS_SERVICE: "http://dataops.utility:5063"
+    EMAIL_SERVICE: "http://notification.utility:5065"
+    METADATA_SERVICE: "http://metadata.utility:5066"
+    PROJECT_SERVICE: "http://project.utility:5064"
+    NOTIFICATION_SERVICE: "http://notification.utility:5065"
+    REDIS_DB: "0"
+    REDIS_HOST: "redis-master.redis"
+    REDIS_PORT: "6379"
+    RDS_DB: "approval"
+    RDS_HOST: "postgres.utility"
+    RDS_USER: "approval_user"
+    RDS_PORT: "5432"
+
+  extraEnvYaml:
+    - name: DB_URI
+      valueFrom:
+        secretKeyRef:
+          name: approval-credentials
+          key: db-uri
+    - name: RDS_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: approval-credentials
+          key: rds-password
+    - name: REDIS_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: approval-credentials
+          key: redis-password
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      cpu: 500m
+      memory: 500Mi
+
+  readinessProbe:
+    tcpSocket:
+      port: 8000
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    failureThreshold: 3
+
+  livenessProbe:
+    httpGet:
+      path: /v1/health
+      port: 8000
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0

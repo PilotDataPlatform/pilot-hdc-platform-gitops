@@ -27,6 +27,7 @@ declare -A CHART_TO_DIRS=(
   [postgresql]="postgresql keycloak-postgresql kong-postgresql"
   [mailhog]="mailhog"
   [notification-service]="notification"
+  [approval-service]="approval"
   [minio]="minio"
   [portal]="portal"
   [redis]="redis"

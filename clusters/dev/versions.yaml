@@ -23,6 +23,10 @@ notification-service:
   image:
     tag: "2.2.10"
 
+approval-service:
+  image:
+    tag: "2.2.9"
+
 portal:
   image:
     tag: "1.6.3-hdc-ovh-dev"
@@ -67,6 +71,7 @@ charts:
   kong: "9.1.8"
   mailhog: "5.0.7"
   notification-service: "0.3.2"
+  approval-service: "0.3.1"
   minio: "11.7.13"
   portal: "2.1.2"
   vault: "0.31.0"

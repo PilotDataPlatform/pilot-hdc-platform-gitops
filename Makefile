@@ -1,5 +1,5 @@
 APPS_DIR := clusters/dev/apps
-APPS := registry-secrets postgresql keycloak-postgresql kong-postgresql redis kafka keycloak auth metadata project dataops kong bff minio mailhog notification portal
+APPS := registry-secrets postgresql keycloak-postgresql kong-postgresql redis kafka keycloak auth metadata project dataops approval kong bff minio mailhog notification portal
 REGISTRY_DIR := clusters/dev
 VERSIONS_FILE := clusters/dev/versions.yaml
 
@@ -86,6 +86,7 @@ helm-test-versions: helm-deps
 	check_tag keycloak keycloak keycloak; \
 	check_tag dataops dataops-service dataops; \
 	check_tag notification notification-service notification; \
+	check_tag approval approval-service approval; \
 	check_tag portal portal portal; \
 	exit $$failed
 
