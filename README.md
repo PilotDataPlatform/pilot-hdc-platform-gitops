@@ -18,6 +18,7 @@ This repo uses ArgoCD's app-of-apps pattern: a root Application (`root-app.yaml`
 | 5 | kafka | Broker + Zookeeper + Connect |
 | 5 | mailhog | SMTP sink for dev (no auth, no ingress) |
 | 5 | minio | Object storage with built-in encryption |
+| 5 | message-bus-greenroom | RabbitMQ (greenroom ns) |
 | 6 | keycloak | |
 | 7 | auth | |
 | 8 | metadata | |
@@ -127,6 +128,7 @@ To add or update a service password: `vault kv patch secret/postgresql <service>
 | `secret/redis` | password | redis, bff, approval |
 | `secret/auth` | keycloak-client-secret | auth service |
 | `secret/approval` | db-uri | approval init container (psql + alembic) |
+| `secret/rabbitmq` | username, password | message-bus-greenroom (RabbitMQ) |
 | `secret/docker-registry/ovh` | username, password | registry-secrets |
 
 ## Acknowledgements
