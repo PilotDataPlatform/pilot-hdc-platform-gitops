@@ -1,0 +1,7 @@
+apiVersion: v2
+name: approval
+version: 0.1.0
+dependencies:
+  - name: approval-service
+    version: "0.3.1"
+    repository: https://pilotdataplatform.github.io/helm-charts/

@@ -69,6 +69,11 @@ spec:
                 secretKeyRef:
                   name: postgresql-credentials
                   key: notification-user-password
+            - name: APPROVAL_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-credentials
+                  key: approval-user-password
           command:
             - /bin/bash
             - -c
@@ -173,6 +178,17 @@ spec:
               GRANT CONNECT ON DATABASE notifications TO notification_user;
               GRANT ALL PRIVILEGES ON DATABASE notifications TO notification_user;
               ALTER DATABASE notifications OWNER TO notification_user;
+              EOSQL
+
+              # approval_user
+              psql -v ON_ERROR_STOP=1 -v pwd="$APPROVAL_USER_PASSWORD" <<'EOSQL'
+              SELECT 'CREATE USER approval_user WITH PASSWORD ' || quote_literal(:'pwd')
+              WHERE NOT EXISTS (SELECT FROM pg_user WHERE usename = 'approval_user') \gexec
+              SELECT 'ALTER USER approval_user WITH PASSWORD ' || quote_literal(:'pwd')
+              WHERE EXISTS (SELECT FROM pg_user WHERE usename = 'approval_user') \gexec
+              GRANT CONNECT ON DATABASE approval TO approval_user;
+              GRANT ALL PRIVILEGES ON DATABASE approval TO approval_user;
+              ALTER DATABASE approval OWNER TO approval_user;
               EOSQL
 
               echo "Service users created successfully!"
