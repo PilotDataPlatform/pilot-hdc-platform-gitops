@@ -64,6 +64,11 @@ spec:
                 secretKeyRef:
                   name: postgresql-credentials
                   key: dataops-user-password
+            - name: NOTIFICATION_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-credentials
+                  key: notification-user-password
           command:
             - /bin/bash
             - -c
@@ -157,6 +162,17 @@ spec:
               ALTER DEFAULT PRIVILEGES IN SCHEMA pilot_ldap GRANT ALL ON SEQUENCES TO auth_user;
               \c postgres
               ALTER DATABASE auth OWNER TO auth_user;
+              EOSQL
+
+              # notification_user
+              psql -v ON_ERROR_STOP=1 -v pwd="$NOTIFICATION_USER_PASSWORD" <<'EOSQL'
+              SELECT 'CREATE USER notification_user WITH PASSWORD ' || quote_literal(:'pwd')
+              WHERE NOT EXISTS (SELECT FROM pg_user WHERE usename = 'notification_user') \gexec
+              SELECT 'ALTER USER notification_user WITH PASSWORD ' || quote_literal(:'pwd')
+              WHERE EXISTS (SELECT FROM pg_user WHERE usename = 'notification_user') \gexec
+              GRANT CONNECT ON DATABASE notifications TO notification_user;
+              GRANT ALL PRIVILEGES ON DATABASE notifications TO notification_user;
+              ALTER DATABASE notifications OWNER TO notification_user;
               EOSQL
 
               echo "Service users created successfully!"

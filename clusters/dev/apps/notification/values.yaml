@@ -1,0 +1,82 @@
+notification-service:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/notification
+    pullPolicy: IfNotPresent
+    # tag 2.2.10 from versions.yaml
+    # chart prefixes: notification-{tag} (main), alembic-{tag} (init)
+
+  fullnameOverride: notification
+  replicaCount: 1
+
+  container:
+    port: 5065
+
+  service:
+    type: ClusterIP
+    port: 5065
+    targetPort: 5065
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  # appConfig: only the 5 vars the chart template renders explicitly
+  appConfig:
+    port: 5065
+    env: dev
+    config_center_enabled: "false"
+    config_center_base_url: "http://common.utility:5062/"
+    srv_namespace: service_notification
+
+  # All other config via extraEnv (applied to BOTH init + main containers)
+  extraEnv:
+    # App
+    HOST: "0.0.0.0"
+    WORKERS: "2"
+    PLATFORM_NAME: PILOT
+    namespace: utility
+    OPEN_TELEMETRY_ENABLED: "false"
+    # SMTP (MailHog — no auth needed)
+    POSTFIX: mailhog.utility
+    POSTFIX_URL: mailhog.utility
+    POSTFIX_PORT: "1025"
+    SMTP_PORT: "1025"
+    SMTP_STARTTLS: "false"
+    SMTP_USER: ""
+    SMTP_PASS: ""
+    EMAIL_ATTACHMENT_MAX_SIZE_BYTES: "2097152"
+    # Database
+    RDS_HOST: postgres.utility
+    RDS_PORT: "5432"
+    RDS_USER: notification_user
+    RDS_DB_NAME: notifications
+
+  # Secret env vars (applied to BOTH init + main containers)
+  extraEnvYaml:
+    - name: RDS_PWD
+      valueFrom:
+        secretKeyRef:
+          name: notification-credentials
+          key: notification-user-password
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      cpu: 500m
+      memory: 500Mi
+
+  readinessProbe:
+    tcpSocket:
+      port: 5065
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    failureThreshold: 3
+
+  livenessProbe:
+    httpGet:
+      path: /v1/health
+      port: 5065
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3

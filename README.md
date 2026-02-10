@@ -16,11 +16,13 @@ This repo uses ArgoCD's app-of-apps pattern: a root Application (`root-app.yaml`
 | 4 | keycloak-postgresql | Keycloak DB |
 | 5 | redis | |
 | 5 | kafka | Broker + Zookeeper + Connect |
+| 5 | mailhog | SMTP sink for dev (no auth, no ingress) |
 | 5 | minio | Object storage with built-in encryption |
 | 6 | keycloak | |
 | 7 | auth | |
 | 8 | metadata | |
 | 8 | project | |
+| 8 | notification | Email notifications (uses MailHog SMTP) |
 | 8 | kong-postgresql | Kong DB (split from kong for PreSync hook) |
 | 9 | kong | API gateway |
 | 10 | bff | Backend-for-frontend |
@@ -115,7 +117,9 @@ vault kv put secret/minio \
 
 | Path | Keys | Used By |
 |------|------|---------|
-| `secret/postgresql` | postgres-password, {metadata,project,auth,dataops}-user-password | postgresql init-job |
+| `secret/postgresql` | postgres-password, {metadata,project,auth,dataops,notification}-user-password | postgresql init-job |
+
+To add or update a service password: `vault kv patch secret/postgresql <service>-user-password=<value>`
 | `secret/keycloak` | admin-password, postgres-password | keycloak |
 | `secret/redis` | password | redis, bff |
 | `secret/auth` | keycloak-client-secret | auth service |
