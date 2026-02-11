@@ -53,7 +53,7 @@ queue-service:
     S3_PORT: "9000"
     S3_INTERNAL_HTTPS: "false"
     # -- RabbitMQ --
-    gm_queue_endpoint: "message-bus-greenroom.greenroom:5672"
+    gm_queue_endpoint: "message-bus-greenroom.greenroom"
     # -- Queue config --
     gr_queue: "gr_queue"
     gr_exchange: "gr_exchange"

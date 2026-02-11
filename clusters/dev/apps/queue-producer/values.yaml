@@ -32,7 +32,7 @@ queue-service:
     move_pipeline: "data_delete"
     WORK_PATH: "/tmp/workdir"
     # -- RabbitMQ --
-    gm_queue_endpoint: "message-bus-greenroom.greenroom:5672"
+    gm_queue_endpoint: "message-bus-greenroom.greenroom"
 
   extraEnvYaml:
     - name: gm_username

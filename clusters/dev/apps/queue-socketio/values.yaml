@@ -25,7 +25,7 @@ queue-service:
 
   extraEnv:
     # -- RabbitMQ --
-    gm_queue_endpoint: "message-bus-greenroom.greenroom:5672"
+    gm_queue_endpoint: "message-bus-greenroom.greenroom"
 
   extraEnvYaml:
     - name: gm_username
