@@ -73,6 +73,8 @@ charts:
   mailhog: "5.0.7"
   notification-service: "0.3.2"
   approval-service: "0.3.1"
+  queue-service: "0.3.0"              # consumer + producer
+  queue-service-socketio: "0.4.1"    # socketio only (same chart, different version)
   minio: "11.7.13"
   portal: "2.1.2"
   vault: "0.31.0"

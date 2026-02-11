@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: queue-consumer
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "8"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/PilotDataPlatform/pilot-hdc-platform-gitops.git
+    targetRevision: main
+    path: clusters/dev/apps/queue-consumer
+    helm:
+      valueFiles:
+        - ../../registry.yaml
+        # no versions.yaml — image tag is in values.yaml (prefixed per sub-service)
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: greenroom
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

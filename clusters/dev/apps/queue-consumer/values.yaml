@@ -1,0 +1,114 @@
+queue-service:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/queue/consumer
+    pullPolicy: IfNotPresent
+    tag: "consumer-2.2.13"  # prefixed tag — NOT from versions.yaml
+
+  fullnameOverride: queue-consumer
+  replicaCount: 1
+
+  container:
+    port: 6060
+
+  service:
+    type: ClusterIP
+    port: 6060
+    targetPort: 6060
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  serviceAccount:
+    create: true
+    name: queue-consumer
+
+  appConfig:
+    env: dev
+    config_center_enabled: "false"
+    config_center_base_url: ""
+
+  extraEnv:
+    # -- Pipeline config --
+    bids_validate_pipeline: "bids_validate"
+    copy_pipeline: "data_transfer"
+    copy_pipeline_folder: "data_transfer_folder"
+    move_pipeline: "data_delete"
+    move_pipeline_folder: "data_delete_folder"
+    # -- Pipeline images (OVH registry) --
+    bids_validate_image: "n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/pipelines/bids-validator:bids-validator-2.2.15"
+    data_transfer_image: "n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/pipelines/filecopy:filecopy-2.2.16"
+    # -- Storage (pass-through to spawned Jobs — consumer doesn't touch FS itself) --
+    data_lake: "/data/core-storage"
+    claim_name: "greenroom-storage"
+    NFS_MOUNT: "nfsvol"
+    # -- Zone labels --
+    GREEN_ZONE_LABEL: "Greenroom"
+    CORE_ZONE_LABEL: "Core"
+    # -- Database (pass-through to spawned Jobs — consumer has NO DB driver) --
+    RDS_DBNAME: "approval"
+    RDS_HOST: "postgres.utility"
+    RDS_PORT: "5432"
+    # -- S3 / MinIO --
+    S3_HOST: "minio.minio"
+    S3_PORT: "9000"
+    S3_INTERNAL_HTTPS: "false"
+    # -- RabbitMQ --
+    gm_queue_endpoint: "message-bus-greenroom.greenroom:5672"
+    # -- Queue config --
+    gr_queue: "gr_queue"
+    gr_exchange: "gr_exchange"
+    # -- Inter-service URLs --
+    DATAOPS_SERVICE: "http://dataops.utility:5063"
+    DATASET_SERVICE: "http://dataset.utility:5081"
+    QUEUE_SERVICE: "http://queue-producer.greenroom:6060"
+    METADATA_SERVICE: "http://metadata.utility:5066"
+    PROJECT_SERVICE: "http://project.utility:5064"
+    APPROVAL_SERVICE: "http://approval.utility:8000"
+    NOTIFICATION_SERVICE: "http://notification.utility:5065"
+    KAFKA_URL: "kafka.utility:9092"
+    REDIS_HOST: "redis-master.redis"
+    REDIS_PORT: "6379"
+    ATLAS_HOST: "atlas.utility"
+    ATLAS_PORT: "21000"
+
+  # Secrets — all pass-through to spawned Jobs (consumer itself uses none except RabbitMQ creds)
+  extraEnvYaml:
+    - name: gm_username
+      valueFrom:
+        secretKeyRef:
+          name: queue-consumer-credentials
+          key: rabbitmq-username
+    - name: gm_password
+      valueFrom:
+        secretKeyRef:
+          name: queue-consumer-credentials
+          key: rabbitmq-password
+    - name: REDIS_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: queue-consumer-credentials
+          key: redis-password
+    - name: S3_ACCESS_KEY
+      valueFrom:
+        secretKeyRef:
+          name: queue-consumer-credentials
+          key: minio-access-key
+    - name: S3_SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: queue-consumer-credentials
+          key: minio-secret-key
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      cpu: 1
+      memory: 1000Mi
+
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: "33%"

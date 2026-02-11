@@ -1,0 +1,7 @@
+apiVersion: v2
+name: queue-socketio
+version: 0.1.0
+dependencies:
+  - name: queue-service
+    version: "0.4.1"   # synced from versions.yaml (queue-service-socketio) via make sync-versions
+    repository: https://pilotdataplatform.github.io/helm-charts/

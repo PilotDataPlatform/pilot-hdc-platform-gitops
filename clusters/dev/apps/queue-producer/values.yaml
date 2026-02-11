@@ -1,0 +1,67 @@
+queue-service:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/queue/producer
+    pullPolicy: IfNotPresent
+    tag: "producer-2.2.13"
+
+  fullnameOverride: queue-producer
+  replicaCount: 1
+
+  container:
+    port: 6060
+
+  service:
+    type: ClusterIP
+    port: 6060
+    targetPort: 6060
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  appConfig:
+    env: dev
+    config_center_enabled: "false"
+    config_center_base_url: ""
+
+  extraEnv:
+    copy_pipeline: "data_transfer"
+    data_storage: "/core-data"
+    gr_queue: "gr_queue"
+    gr_exchange: "gr_exchange"
+    LOG_PATH: "/tmp/logs"
+    move_pipeline: "data_delete"
+    WORK_PATH: "/tmp/workdir"
+    # -- RabbitMQ --
+    gm_queue_endpoint: "message-bus-greenroom.greenroom:5672"
+
+  extraEnvYaml:
+    - name: gm_username
+      valueFrom:
+        secretKeyRef:
+          name: queue-producer-credentials
+          key: rabbitmq-username
+    - name: gm_password
+      valueFrom:
+        secretKeyRef:
+          name: queue-producer-credentials
+          key: rabbitmq-password
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      cpu: 1
+      memory: 1000Mi
+
+  readinessProbe:
+    tcpSocket:
+      port: 6060
+    initialDelaySeconds: 5
+    periodSeconds: 10
+
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: "33%"

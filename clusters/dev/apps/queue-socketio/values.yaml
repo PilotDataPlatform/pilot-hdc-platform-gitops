@@ -1,0 +1,75 @@
+queue-service:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/queue/socketio
+    pullPolicy: IfNotPresent
+    tag: "socketio-2.2.13"
+
+  fullnameOverride: queue-socketio
+  replicaCount: 1
+
+  container:
+    port: 6062
+
+  service:
+    type: ClusterIP
+    port: 6062
+    targetPort: 6062
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  appConfig:
+    env: dev
+    config_center_enabled: "false"
+    config_center_base_url: ""
+
+  extraEnv:
+    # -- RabbitMQ --
+    gm_queue_endpoint: "message-bus-greenroom.greenroom:5672"
+
+  extraEnvYaml:
+    - name: gm_username
+      valueFrom:
+        secretKeyRef:
+          name: queue-socketio-credentials
+          key: rabbitmq-username
+    - name: gm_password
+      valueFrom:
+        secretKeyRef:
+          name: queue-socketio-credentials
+          key: rabbitmq-password
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      cpu: 1
+      memory: 1000Mi
+
+  readinessProbe:
+    tcpSocket:
+      port: 6062
+    initialDelaySeconds: 5
+    periodSeconds: 10
+
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: "33%"
+
+  ingress:
+    enabled: true
+    hostname: dev.hdc.ebrains.eu
+    path: /socket.io/
+    pathType: ImplementationSpecific
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/proxy-body-size: 25m
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      # WebSocket support
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    tls: true

@@ -30,9 +30,17 @@ declare -A CHART_TO_DIRS=(
   [approval-service]="approval"
   [minio]="minio"
   [portal]="portal"
+  [queue-service]="queue-consumer queue-producer"
+  [queue-service-socketio]="queue-socketio"
   [rabbitmq]="message-bus-greenroom"
   [redis]="redis"
   [vault]="vault"
+)
+
+# When the versions.yaml key differs from the Chart.yaml dependency name
+# e.g. queue-service-socketio in versions.yaml → queue-service in Chart.yaml
+declare -A DEP_NAME_OVERRIDE=(
+  [queue-service-socketio]="queue-service"
 )
 
 changed=0
@@ -40,6 +48,7 @@ changed=0
 for chart in $(yq '.charts | keys | .[]' "$VERSIONS_FILE"); do
   version=$(yq ".charts.\"$chart\"" "$VERSIONS_FILE")
   dirs="${CHART_TO_DIRS[$chart]:-}"
+  dep_name="${DEP_NAME_OVERRIDE[$chart]:-$chart}"
 
   if [[ -z "$dirs" ]]; then
     echo "WARN: no directory mapping for chart '$chart'" >&2
@@ -53,11 +62,11 @@ for chart in $(yq '.charts | keys | .[]' "$VERSIONS_FILE"); do
       continue
     fi
 
-    current=$(yq ".dependencies[] | select(.name == \"$chart\") | .version" "$chart_yaml")
+    current=$(yq ".dependencies[] | select(.name == \"$dep_name\") | .version" "$chart_yaml")
     if [[ "$current" == "$version" ]]; then
       echo "✓ $dir/$chart: $version (unchanged)"
     else
-      yq -i "(.dependencies[] | select(.name == \"$chart\")).version = \"$version\"" "$chart_yaml"
+      yq -i "(.dependencies[] | select(.name == \"$dep_name\")).version = \"$version\"" "$chart_yaml"
       echo "✎ $dir/$chart: $current → $version"
       changed=1
     fi

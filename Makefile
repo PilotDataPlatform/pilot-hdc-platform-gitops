@@ -1,5 +1,5 @@
 APPS_DIR := clusters/dev/apps
-APPS := registry-secrets postgresql keycloak-postgresql kong-postgresql redis kafka message-bus-greenroom keycloak auth metadata project dataops approval kong bff minio mailhog notification portal
+APPS := registry-secrets postgresql keycloak-postgresql kong-postgresql redis kafka message-bus-greenroom keycloak auth metadata project dataops approval kong bff minio mailhog notification portal queue-consumer queue-producer queue-socketio
 REGISTRY_DIR := clusters/dev
 VERSIONS_FILE := clusters/dev/versions.yaml
 
