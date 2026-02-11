@@ -9,6 +9,9 @@ This repo uses ArgoCD's app-of-apps pattern: a root Application (`root-app.yaml`
 
 | Wave | App | Notes |
 |------|-----|-------|
+| -1 | argo-cd | GitOps controller |
+| 0 | cert-manager | TLS certificate management |
+| 1 | ingress-nginx | Ingress controller |
 | 2 | external-secrets | Operator + CRDs |
 | 3 | vault | Deploys Vault server |
 | 3 | registry-secrets | ExternalSecrets for docker-registry-secret |
@@ -17,16 +20,20 @@ This repo uses ArgoCD's app-of-apps pattern: a root Application (`root-app.yaml`
 | 5 | redis | |
 | 5 | kafka | Broker + Zookeeper + Connect |
 | 5 | mailhog | SMTP sink for dev (no auth, no ingress) |
-| 5 | minio | Object storage with built-in encryption |
+| 5 | minio | Object storage, S3 API ingress at `object.dev.hdc.ebrains.eu` |
 | 5 | message-bus-greenroom | RabbitMQ (greenroom ns) |
 | 6 | keycloak | |
 | 7 | auth | |
 | 8 | metadata | |
 | 8 | project | |
+| 8 | dataset | Dataset management (S3, metadata) |
 | 8 | dataops | Data operations (lineage, file ops) |
 | 8 | notification | Email notifications (uses MailHog SMTP) |
 | 8 | approval | Copy request workflows |
 | 8 | kong-postgresql | Kong DB (split from kong for PreSync hook) |
+| 8 | queue-consumer | Queue consumer (greenroom ns) |
+| 8 | queue-producer | Queue producer (greenroom ns) |
+| 8 | queue-socketio | Queue WebSocket notifications |
 | 9 | kong | API gateway |
 | 10 | bff | Backend-for-frontend |
 | 11 | portal | Frontend UI |
@@ -121,15 +128,17 @@ vault kv put secret/minio \
 
 | Path | Keys | Used By |
 |------|------|---------|
-| `secret/postgresql` | postgres-password, {metadata,project,auth,dataops,notification,approval}-user-password | postgresql init-job |
+| `secret/postgresql` | postgres-password, {metadata,project,auth,dataops,dataset,notification,approval}-user-password | postgresql, init-job, metadata, project, auth, dataops, dataset, notification, approval |
+| `secret/minio` | access_key, secret_key, kms_secret_key | minio, bff, dataset, queue-consumer |
+| `secret/keycloak` | admin-password, postgres-password | keycloak, keycloak-postgresql |
+| `secret/redis` | password | redis, auth, bff, dataops, approval, dataset, queue-consumer |
+| `secret/auth` | keycloak-client-secret | auth |
+| `secret/approval` | db-uri | approval init container (psql + alembic) |
+| `secret/kong` | postgres-password, postgres-user | kong-postgresql |
+| `secret/rabbitmq` | username, password | message-bus-greenroom, queue-consumer, queue-producer, queue-socketio |
+| `secret/docker-registry/ovh` | username, password | registry-secrets |
 
 To add or update a service password: `vault kv patch secret/postgresql <service>-user-password=<value>`
-| `secret/keycloak` | admin-password, postgres-password | keycloak |
-| `secret/redis` | password | redis, bff, approval |
-| `secret/auth` | keycloak-client-secret | auth service |
-| `secret/approval` | db-uri | approval init container (psql + alembic) |
-| `secret/rabbitmq` | username, password | message-bus-greenroom (RabbitMQ) |
-| `secret/docker-registry/ovh` | username, password | registry-secrets |
 
 ## Acknowledgements
 The development of the HealthDataCloud open source software was supported by the EBRAINS research infrastructure, funded from the European Union's Horizon 2020 Framework Programme for Research and Innovation under the Specific Grant Agreement No. 945539 (Human Brain Project SGA3) and H2020 Research and Innovation Action Grant Interactive Computing E-Infrastructure for the Human Brain Project ICEI 800858.
