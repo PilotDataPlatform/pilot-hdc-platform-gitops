@@ -1,0 +1,7 @@
+apiVersion: v2
+name: dataset
+version: 0.1.0
+dependencies:
+  - name: base-chart-hdc
+    version: "1.0.1"
+    repository: https://pilotdataplatform.github.io/helm-charts/

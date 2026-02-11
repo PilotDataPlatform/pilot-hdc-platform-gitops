@@ -69,6 +69,11 @@ spec:
                 secretKeyRef:
                   name: postgresql-credentials
                   key: notification-user-password
+            - name: DATASET_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-credentials
+                  key: dataset-user-password
             - name: APPROVAL_USER_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -178,6 +183,17 @@ spec:
               GRANT CONNECT ON DATABASE notifications TO notification_user;
               GRANT ALL PRIVILEGES ON DATABASE notifications TO notification_user;
               ALTER DATABASE notifications OWNER TO notification_user;
+              EOSQL
+
+              # dataset_user
+              psql -v ON_ERROR_STOP=1 -v pwd="$DATASET_USER_PASSWORD" <<'EOSQL'
+              SELECT 'CREATE USER dataset_user WITH PASSWORD ' || quote_literal(:'pwd')
+              WHERE NOT EXISTS (SELECT FROM pg_user WHERE usename = 'dataset_user') \gexec
+              SELECT 'ALTER USER dataset_user WITH PASSWORD ' || quote_literal(:'pwd')
+              WHERE EXISTS (SELECT FROM pg_user WHERE usename = 'dataset_user') \gexec
+              GRANT CONNECT ON DATABASE dataset TO dataset_user;
+              GRANT ALL PRIVILEGES ON DATABASE dataset TO dataset_user;
+              ALTER DATABASE dataset OWNER TO dataset_user;
               EOSQL
 
               # approval_user

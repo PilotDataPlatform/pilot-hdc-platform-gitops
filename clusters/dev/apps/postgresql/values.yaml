@@ -29,6 +29,7 @@ postgresql:
           SELECT 'CREATE DATABASE auth' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'auth')\gexec
           SELECT 'CREATE DATABASE notifications' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'notifications')\gexec
           SELECT 'CREATE DATABASE approval' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'approval')\gexec
+          SELECT 'CREATE DATABASE dataset' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'dataset')\gexec
           SELECT 'CREATE DATABASE approval_user' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'approval_user')\gexec -- psql default DB for approval init container
 
           -- metadata schemas + extensions

@@ -1,0 +1,162 @@
+base-chart-hdc:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/dataset
+    tag: "2.3.38"
+    tagPrefix: "dataset"
+    pullPolicy: IfNotPresent
+
+  initContainers:
+    enabled: true
+    image:
+      tagPrefix: alembic
+
+  fullnameOverride: dataset
+  labels:
+    app: dataset
+    instance: dataset-service
+  replicaCount: 1
+
+  container:
+    name: dataset
+    ports:
+      - name: http
+        containerPort: 5081
+        protocol: TCP
+
+  service:
+    type: ClusterIP
+    ports:
+      - port: 5081
+        targetPort: 5081
+        protocol: TCP
+        name: http
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  appConfig:
+    env: dev
+    config_center_enabled: false
+
+  extraEnv:
+    # Telemetry
+    OPEN_TELEMETRY_ENABLED: "true"
+    ENABLE_PROMETHEUS_METRICS: "false"
+    # Dataset config
+    DATASET_FILE_FOLDER: "data"
+    DATASET_SCHEMA_FOLDER: "schema"
+    DATASET_CODE_REGEX: "^[a-z0-9]{3,32}$"
+    ROOT_PATH: "/data/core-storage"
+    CORE_ZONE_LABEL: "Core"
+    GREEN_ZONE_LABEL: "Greenroom"
+    # MinIO
+    MINIO_OPENID_CLIENT: "react-app"
+    MINIO_ENDPOINT: "minio.minio:9000"
+    MINIO_HTTPS: "False"
+    S3_GATEWAY: "True"
+    S3_INTERNAL: "minio.minio:9000"
+    S3_INTERNAL_HTTPS: "False"
+    S3_HOST: "minio.minio"
+    S3_PORT: "9000"
+    S3_HTTPS_ENABLED: "false"
+    S3_GATEWAY_ENABLED: "true"
+    S3_BUCKET_ENCRYPTION_ENABLED: "false"
+    S3_PUBLIC: "object.dev.hdc.ebrains.eu"
+    S3_PUBLIC_HTTPS: "TRUE"
+    # Keycloak
+    KEYCLOAK_URL: "http://keycloak.keycloak/auth/realms/hdc/protocol/openid-connect/token"
+    # Services
+    METADATA_SERVICE: "http://metadata.utility:5066"
+    PROJECT_SERVICE: "http://project.utility:5064"
+    QUEUE_SERVICE: "http://queue-producer.greenroom:6060"
+    # Kafka
+    KAFKA_URL: "kafka-headless.utility:9092"
+    # Queue
+    gm_queue_endpoint: "message-bus-greenroom.greenroom"
+    # Database
+    RDS_HOST: "postgres.utility"
+    RDS_PORT: "5432"
+    RDS_DBNAME: "dataset"
+    RDS_SCHEMA_DEFAULT: "dataset"
+    OPSDB_UTILITY_HOST: "postgres.utility"
+    OPSDB_UTILITY_PORT: "5432"
+    RUN_MIGRATIONS_ON_BUILD: "false"
+    ALEMBIC_CONFIG: "migrations/alembic.ini"
+    # Redis
+    REDIS_HOST: "redis-master.redis"
+    REDIS_PORT: "6379"
+    REDIS_DB: "0"
+    # Undeployed services - localhost placeholders
+    NEO4J_SERVICE: "http://localhost:5062"
+    CATALOGUING_SERVICE: "http://localhost:5064"
+    ENTITYINFO_SERVICE: "http://localhost:5066"
+    ELASTIC_SEARCH_SERVICE: "http://localhost:9200"
+    UTILITY_SERVICE: "http://localhost:5062"
+    DATA_OPS_UTIL: "http://localhost:5063"
+    SEND_MESSAGE_URL: "http://localhost:6060"
+    LINEAGE_SERVICE: "http://localhost:5064"
+    # Misc
+    DOWNLOAD_TOKEN_EXPIRE_AT: "5"
+    MAX_PREVIEW_SIZE: "500000"
+    ESSENTIALS_NAME: "essential.schema.json"
+    ESSENTIALS_TPL_NAME: "Essential"
+
+  extraEnvYaml:
+    - name: OPSDB_UTILITY_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: dataset-credentials
+          key: db-username
+    - name: OPSDB_UTILITY_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: dataset-credentials
+          key: db-password
+    - name: MINIO_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: dataset-credentials
+          key: minio-access-key
+    - name: MINIO_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: dataset-credentials
+          key: minio-secret-key
+    - name: S3_ACCESS_KEY
+      valueFrom:
+        secretKeyRef:
+          name: dataset-credentials
+          key: minio-access-key
+    - name: S3_SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: dataset-credentials
+          key: minio-secret-key
+    - name: REDIS_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: dataset-credentials
+          key: redis-password
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      cpu: 500m
+      memory: 500Mi
+
+  readinessProbe:
+    tcpSocket:
+      port: 5081
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    failureThreshold: 3
+
+  livenessProbe:
+    httpGet:
+      path: /v1/health
+      port: 5081
+    periodSeconds: 10
+    failureThreshold: 3
+    timeoutSeconds: 3

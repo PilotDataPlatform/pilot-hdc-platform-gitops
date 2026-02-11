@@ -32,6 +32,7 @@ declare -A CHART_TO_DIRS=(
   [portal]="portal"
   [queue-service]="queue-consumer queue-producer"
   [queue-service-socketio]="queue-socketio"
+  [base-chart-hdc]="bff dataset"
   [rabbitmq]="message-bus-greenroom"
   [redis]="redis"
   [vault]="vault"
