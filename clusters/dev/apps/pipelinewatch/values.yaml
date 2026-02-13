@@ -1,0 +1,52 @@
+pipelinewatch-service:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/pipelinewatch
+    pullPolicy: IfNotPresent
+
+  fullnameOverride: pipelinewatch-k8s-job
+  replicaCount: 1
+
+  container:
+    port: 6063
+    command: /app/worker_k8s_job_watch.py
+
+  service:
+    type: ClusterIP
+    port: 6063
+    targetPort: 6063
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  serviceAccount:
+    create: true
+    name: pipelinewatch
+
+  appConfig:
+    env: dev
+    config_center_enabled: "false"
+
+  extraEnv:
+    GR_ZONE_LABEL: "Greenroom"
+    CORE_ZONE_LABEL: "Core"
+    METADATA_SERVICE: "http://metadata.utility:5066"
+    DATAOPS_SERVICE: "http://dataops.utility:5063"
+
+  volumes:
+    name: nfsvol
+    mountPath: /data/core-storage
+    claimName: greenroom-storage
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      cpu: 1
+      memory: 1000Mi
+
+  readinessProbe:
+    tcpSocket:
+      port: 6063
+    initialDelaySeconds: 10
+    periodSeconds: 10

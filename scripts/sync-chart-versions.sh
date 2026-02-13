@@ -37,6 +37,7 @@ declare -A CHART_TO_DIRS=(
   [redis]="redis"
   [vault]="vault"
   [nfs-subdir-external-provisioner]="nfs-provisioner"
+  [pipelinewatch-service]="pipelinewatch"
 )
 
 # When the versions.yaml key differs from the Chart.yaml dependency name

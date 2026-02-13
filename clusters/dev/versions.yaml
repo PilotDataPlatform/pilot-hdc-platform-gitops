@@ -23,6 +23,10 @@ notification-service:
   image:
     tag: "2.2.10"
 
+pipelinewatch-service:
+  image:
+    tag: "pipelinewatch-2.2.7"
+
 approval-service:
   image:
     tag: "2.2.9"
@@ -79,3 +83,4 @@ charts:
   portal: "2.1.2"
   vault: "0.31.0"
   nfs-subdir-external-provisioner: "4.0.18"
+  pipelinewatch-service: "0.4.2"
