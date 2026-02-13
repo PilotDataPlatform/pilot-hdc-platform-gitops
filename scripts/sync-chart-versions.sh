@@ -36,6 +36,7 @@ declare -A CHART_TO_DIRS=(
   [rabbitmq]="message-bus-greenroom"
   [redis]="redis"
   [vault]="vault"
+  [nfs-subdir-external-provisioner]="nfs-provisioner"
 )
 
 # When the versions.yaml key differs from the Chart.yaml dependency name
