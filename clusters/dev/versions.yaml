@@ -78,3 +78,4 @@ charts:
   minio: "11.7.13"
   portal: "2.1.2"
   vault: "0.31.0"
+  nfs-subdir-external-provisioner: "4.0.18"

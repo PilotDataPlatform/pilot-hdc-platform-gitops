@@ -1,0 +1,29 @@
+nfs-subdir-external-provisioner:
+  fullnameOverride: nfs-provisioner
+
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-external/sig-storage/nfs-subdir-external-provisioner
+    tag: v4.0.2
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  nfs:
+    server: 10.0.0.87
+    path: /nfs/export
+
+  storageClass:
+    name: nfs-client
+    create: true
+    onDelete: "delete"
+    reclaimPolicy: Delete
+    accessModes: ReadWriteOnce
+    volumeBindingMode: Immediate
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
