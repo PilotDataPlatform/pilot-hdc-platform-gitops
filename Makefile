@@ -3,7 +3,7 @@ APPS := registry-secrets greenroom-storage core-storage nfs-provisioner postgres
 REGISTRY_DIR := clusters/dev
 VERSIONS_FILE := clusters/dev/versions.yaml
 
-.PHONY: helm-deps helm-test-eso helm-test-image helm-test-versions helm-test-envdup helm-test-pullsecrets helm-test-envvars-rendered sync-versions test clean switch-registry which-registry
+.PHONY: helm-deps helm-test-eso helm-test-image helm-test-versions helm-test-envdup helm-test-pullsecrets helm-test-envvars-rendered helm-test-regsecret-coverage sync-versions test clean switch-registry which-registry
 
 EXPECTED_REGISTRY := $(shell grep 'imageRegistry:' $(REGISTRY_DIR)/registry.yaml 2>/dev/null | awk '{print $$2}')
 
@@ -111,7 +111,12 @@ helm-test-envvars-rendered: helm-deps
 	@echo "Testing env vars defined in values.yaml are rendered..."
 	@bash scripts/check-envvars-rendered.sh $(APPS)
 
-test: helm-test-eso helm-test-image helm-test-versions helm-test-envdup helm-test-pullsecrets helm-test-envvars-rendered
+# Ensure every namespace that uses docker-registry-secret is covered by registry-secrets
+helm-test-regsecret-coverage: helm-deps
+	@echo "Testing registry-secret namespace coverage..."
+	@bash scripts/check-registry-secret-coverage.sh $(APPS)
+
+test: helm-test-eso helm-test-image helm-test-versions helm-test-envdup helm-test-pullsecrets helm-test-envvars-rendered helm-test-regsecret-coverage
 
 clean:
 	@for app in $(APPS); do \
