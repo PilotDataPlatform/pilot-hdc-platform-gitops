@@ -1,0 +1,53 @@
+name: PR Tests
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'clusters/**'
+      - 'scripts/**'
+      - 'Makefile'
+
+jobs:
+  sync-versions-check:
+    name: Chart versions in sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: mikefarah/yq@v4
+
+      - run: make sync-versions
+
+      - name: Fail if Chart.yaml files drifted
+        run: |
+          if ! git diff --exit-code -- 'clusters/dev/apps/*/Chart.yaml'; then
+            echo "::error::Chart.yaml versions out of sync with versions.yaml. Run 'make sync-versions' and commit."
+            exit 1
+          fi
+
+  helm-tests:
+    name: Helm template tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/setup-helm@v4
+
+      - uses: mikefarah/yq@v4
+
+      - name: Cache Helm dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/helm
+            clusters/dev/apps/*/charts
+          key: helm-deps-${{ hashFiles('clusters/dev/apps/*/Chart.yaml', 'clusters/dev/apps/*/Chart.lock') }}
+          restore-keys: helm-deps-
+
+      - name: Add Helm repos
+        run: |
+          helm repo add pilot https://pilotdataplatform.github.io/helm-charts/
+          helm repo add nfs-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+
+      - run: make test
