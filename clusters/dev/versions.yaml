@@ -27,6 +27,14 @@ pipelinewatch-service:
   image:
     tag: "pipelinewatch-2.2.7"
 
+upload-service:
+  image:
+    tag: "upload-2.2.17"
+
+download-service:
+  image:
+    tag: "download-2.2.19"
+
 approval-service:
   image:
     tag: "2.2.9"
@@ -84,3 +92,5 @@ charts:
   vault: "0.31.0"
   nfs-subdir-external-provisioner: "4.0.18"
   pipelinewatch-service: "0.4.2"
+  upload-service: "0.3.1"
+  download-service: "1.0.6"
