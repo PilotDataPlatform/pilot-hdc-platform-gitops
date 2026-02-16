@@ -1,0 +1,94 @@
+download-service:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/download
+    pullPolicy: IfNotPresent
+
+
+  fullnameOverride: download
+  replicaCount: 1
+
+  container:
+    port: 5077
+
+  service:
+    type: ClusterIP
+    port: 5077
+    targetPort: 5077
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  appConfig:
+    port: 5077
+    env: dev
+    config_center_enabled: false
+    ROOT_PATH: "/data/core-storage"
+    OPEN_TELEMETRY_ENABLED: "False"
+
+  extraEnv:
+    HOST: "0.0.0.0"
+    namespace: "core"
+    S3_INTERNAL: "minio.minio:9000"
+    S3_INTERNAL_HTTPS: "FALSE"
+    S3_PUBLIC: "object.dev.hdc.ebrains.eu"
+    S3_PUBLIC_HTTPS: "TRUE"
+
+  extraEnvYaml:
+    - name: DOWNLOAD_KEY
+      valueFrom:
+        secretKeyRef:
+          name: download-credentials
+          key: download-key
+    - name: REDIS_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: download-credentials
+          key: redis-password
+    - name: S3_ACCESS_KEY
+      valueFrom:
+        secretKeyRef:
+          name: download-credentials
+          key: minio-access-key
+    - name: S3_SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: download-credentials
+          key: minio-secret-key
+
+  extraVolumeMounts:
+    - name: download-storage
+      mountPath: /data/core-storage
+      readOnly: false
+
+  extraVolumes:
+    - name: download-storage
+      persistentVolumeClaim:
+        claimName: core-storage
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      cpu: 500m
+      memory: 500Mi
+
+  readinessProbe:
+    tcpSocket:
+      port: 5077
+    initialDelaySeconds: 5
+    periodSeconds: 10
+
+  livenessProbe:
+    httpGet:
+      path: /v1/health
+      port: 5077
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0

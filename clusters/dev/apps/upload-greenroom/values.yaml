@@ -1,0 +1,96 @@
+upload-service:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/upload
+    pullPolicy: IfNotPresent
+
+
+  fullnameOverride: upload
+  replicaCount: 1
+
+  container:
+    port: 5079
+
+  service:
+    type: ClusterIP
+    port: 5079
+    targetPort: 5079
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  appConfig:
+    port: 5079
+    env: dev
+
+  extraEnv:
+    HOST: "0.0.0.0"
+    namespace: "greenroom"
+    ROOT_PATH: "/data/greenroom-storage"
+    CORE_ZONE_LABEL: "Core"
+    GREEN_ZONE_LABEL: "Greenroom"
+    DATAOPS_SERVICE: "http://dataops.utility:5063"
+    METADATA_SERVICE: "http://metadata.utility:5066"
+    PROJECT_SERVICE: "http://project.utility:5064"
+    S3_INTERNAL: "minio.minio:9000"
+    S3_INTERNAL_HTTPS: "False"
+    S3_PUBLIC: "object.dev.hdc.ebrains.eu"
+    S3_PUBLIC_HTTPS: "True"
+    REDIS_HOST: "redis-master.redis"
+    REDIS_PORT: "6379"
+    REDIS_DB: "0"
+    KAFKA_URL: "kafka.utility:9092"
+    KAFKA_ACTIVITY_TOPIC: "metadata.items.activity"
+    OPEN_TELEMETRY_ENABLED: "False"
+    OPEN_TELEMETRY_HOST: "127.0.0.1"
+    OPEN_TELEMETRY_PORT: "6831"
+
+  extraEnvYaml:
+    - name: REDIS_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: upload-credentials
+          key: redis-password
+    - name: S3_ACCESS_KEY
+      valueFrom:
+        secretKeyRef:
+          name: upload-credentials
+          key: minio-access-key
+    - name: S3_SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: upload-credentials
+          key: minio-secret-key
+
+  # Single object, not array — chart template accesses .Values.volumes.mountPath directly
+  volumes:
+    name: upload-storage
+    mountPath: /data/greenroom-storage
+    claimName: greenroom-storage
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      cpu: 500m
+      memory: 500Mi
+
+  readinessProbe:
+    tcpSocket:
+      port: 5079
+    initialDelaySeconds: 5
+    periodSeconds: 10
+
+  livenessProbe:
+    httpGet:
+      path: /v1/health
+      port: 5079
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0

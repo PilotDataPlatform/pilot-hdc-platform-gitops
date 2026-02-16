@@ -38,6 +38,8 @@ declare -A CHART_TO_DIRS=(
   [vault]="vault"
   [nfs-subdir-external-provisioner]="nfs-provisioner"
   [pipelinewatch-service]="pipelinewatch"
+  [upload-service]="upload-greenroom upload-core"
+  [download-service]="download-greenroom download-core"
 )
 
 # When the versions.yaml key differs from the Chart.yaml dependency name

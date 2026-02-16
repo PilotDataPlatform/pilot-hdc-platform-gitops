@@ -1,5 +1,5 @@
 APPS_DIR := clusters/dev/apps
-APPS := registry-secrets greenroom-storage nfs-provisioner postgresql keycloak-postgresql kong-postgresql redis kafka message-bus-greenroom keycloak auth metadata project dataops dataset approval kong bff minio mailhog notification portal queue-consumer queue-producer queue-socketio pipelinewatch
+APPS := registry-secrets greenroom-storage core-storage nfs-provisioner postgresql keycloak-postgresql kong-postgresql redis kafka message-bus-greenroom keycloak auth metadata project dataops dataset approval kong bff minio mailhog notification portal queue-consumer queue-producer queue-socketio pipelinewatch upload-greenroom upload-core download-greenroom download-core
 REGISTRY_DIR := clusters/dev
 VERSIONS_FILE := clusters/dev/versions.yaml
 
@@ -89,6 +89,10 @@ helm-test-versions: helm-deps
 	check_tag approval approval-service approval; \
 	check_tag portal portal portal; \
 	check_tag pipelinewatch pipelinewatch-service pipelinewatch; \
+	check_tag upload-greenroom upload-service upload-greenroom; \
+	check_tag upload-core upload-service upload-core; \
+	check_tag download-greenroom download-service download-greenroom; \
+	check_tag download-core download-service download-core; \
 	exit $$failed
 
 # Detect duplicate env var names that ServerSideApply would reject

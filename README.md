@@ -13,8 +13,11 @@ This repo uses ArgoCD's app-of-apps pattern: a root Application (`root-app.yaml`
 | 0 | cert-manager | TLS certificate management |
 | 1 | ingress-nginx | Ingress controller |
 | 2 | external-secrets | Operator + CRDs |
+| 2 | nfs-provisioner | NFS StorageClass for RWX PVCs |
 | 3 | vault | Deploys Vault server |
 | 3 | registry-secrets | ExternalSecrets for docker-registry-secret |
+| 3 | greenroom-storage | RWX PVC for upload/download (greenroom ns, nfs-client) |
+| 3 | core-storage | RWX PVC for upload/download (core ns, nfs-client) |
 | 4 | postgresql | Main DB (utility ns) |
 | 4 | keycloak-postgresql | Keycloak DB |
 | 5 | redis | |
@@ -34,6 +37,11 @@ This repo uses ArgoCD's app-of-apps pattern: a root Application (`root-app.yaml`
 | 8 | queue-consumer | Queue consumer (greenroom ns) |
 | 8 | queue-producer | Queue producer (greenroom ns) |
 | 8 | queue-socketio | Queue WebSocket notifications |
+| 8 | pipelinewatch | Pipeline status watcher |
+| 8 | upload-greenroom | Upload service (greenroom ns) |
+| 8 | upload-core | Upload service (core ns) |
+| 8 | download-greenroom | Download service (greenroom ns) |
+| 8 | download-core | Download service (core ns) |
 | 9 | kong | API gateway |
 | 10 | bff | Backend-for-frontend |
 | 11 | portal | Frontend UI |
@@ -129,13 +137,14 @@ vault kv put secret/minio \
 | Path | Keys | Used By |
 |------|------|---------|
 | `secret/postgresql` | postgres-password, {metadata,project,auth,dataops,dataset,notification,approval}-user-password | postgresql, init-job, metadata, project, auth, dataops, dataset, notification, approval |
-| `secret/minio` | access_key, secret_key, kms_secret_key | minio, bff, dataset, queue-consumer |
+| `secret/minio` | access_key, secret_key, kms_secret_key | minio, bff, dataset, queue-consumer, upload-greenroom, upload-core, download-greenroom, download-core |
 | `secret/keycloak` | admin-password, postgres-password | keycloak, keycloak-postgresql |
-| `secret/redis` | password | redis, auth, bff, dataops, approval, dataset, queue-consumer |
+| `secret/redis` | password | redis, auth, bff, dataops, approval, dataset, queue-consumer, upload-greenroom, upload-core |
 | `secret/auth` | keycloak-client-secret | auth |
 | `secret/approval` | db-uri | approval init container (psql + alembic) |
 | `secret/kong` | postgres-password, postgres-user | kong-postgresql |
 | `secret/rabbitmq` | username, password | message-bus-greenroom, queue-consumer, queue-producer, queue-socketio |
+| `secret/download` | download-key | download-greenroom, download-core |
 | `secret/docker-registry/ovh` | username, password | registry-secrets |
 
 To add or update a service password: `vault kv patch secret/postgresql <service>-user-password=<value>`
