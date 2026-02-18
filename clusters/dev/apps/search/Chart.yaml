@@ -1,0 +1,7 @@
+apiVersion: v2
+name: search
+version: 0.1.0
+dependencies:
+  - name: search-service
+    version: "0.2.2"
+    repository: https://pilotdataplatform.github.io/helm-charts/

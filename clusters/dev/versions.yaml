@@ -39,6 +39,14 @@ approval-service:
   image:
     tag: "2.2.9"
 
+metadata-event-handler:
+  image:
+    tag: "metadata_event_handler-1.0.8"
+
+search-service:
+  image:
+    tag: "2.2.10"
+
 portal:
   image:
     tag: "1.6.3-hdc-ovh-dev"
@@ -95,3 +103,5 @@ charts:
   pipelinewatch-service: "0.4.2"
   upload-service: "0.3.1"
   download-service: "1.0.6"
+  metadata-event-handler: "0.1.1"
+  search-service: "0.2.2"
