@@ -41,6 +41,8 @@ declare -A CHART_TO_DIRS=(
   [pipelinewatch-service]="pipelinewatch"
   [upload-service]="upload-greenroom upload-core"
   [download-service]="download-greenroom download-core"
+  [metadata-event-handler]="metadata-event-handler"
+  [search-service]="search"
 )
 
 # When the versions.yaml key differs from the Chart.yaml dependency name

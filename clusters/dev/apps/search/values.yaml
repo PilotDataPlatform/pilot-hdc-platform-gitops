@@ -1,0 +1,47 @@
+search-service:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/search
+    pullPolicy: IfNotPresent
+
+  fullnameOverride: search
+  replicaCount: 1
+
+  container:
+    port: 5064
+
+  service:
+    type: ClusterIP
+    port: 5064
+    targetPort: 5064
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  appConfig:
+    env: dev
+    port: 5064
+    config_center_enabled: false
+    config_center_base_url: http://common.utility:5062/
+    srv_namespace: service_search
+
+  extraEnv:
+    HOST: "0.0.0.0"
+    PORT: "5064"
+    ELASTICSEARCH_URI: "http://elasticsearch-master.utility:9200"
+    WORKSERS: "2"
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      cpu: 500m
+      memory: 500Mi
+
+  readinessProbe:
+    tcpSocket:
+      port: 5064
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    failureThreshold: 3
+    successThreshold: 1
