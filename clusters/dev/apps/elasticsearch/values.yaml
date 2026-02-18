@@ -1,0 +1,51 @@
+elasticsearch:
+  global:
+    imageRegistry: n47w5524.c1.de1.container-registry.ovh.net
+    imagePullSecrets:
+      - docker-registry-secret
+
+  image:
+    repository: hdc-services-external/bitnami/elasticsearch
+    tag: 7.17.3-debian-10-r29
+
+  # Single-node master (no split-brain risk with 1 node)
+  master:
+    replicas: 1
+    heapSize: 1024m
+    resources:
+      requests:
+        cpu: 25m
+        memory: 2048Mi
+    persistence:
+      accessModes:
+        - ReadWriteOnce
+
+  # Single data node for dev
+  data:
+    replicas: 1
+    heapSize: 1024m
+    resources:
+      requests:
+        cpu: 25m
+        memory: 2048Mi
+    persistence:
+      accessModes:
+        - ReadWriteOnce
+      size: 5Gi
+
+  # Disabled node types (same as CSCS)
+  coordinating:
+    replicas: 0
+  ingest:
+    replicas: 0
+  curator:
+    enabled: false
+  metrics:
+    enabled: false
+
+  # OVH nodes have vm.max_map_count=65530 (too low for ES, needs >=262144)
+  # Init container runs sysctl -w vm.max_map_count=262144 as privileged
+  sysctlImage:
+    enabled: true
+    repository: hdc-services-external/bitnami/bitnami-shell-archived
+    tag: 10-debian-10-r403
