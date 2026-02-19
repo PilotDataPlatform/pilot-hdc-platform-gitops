@@ -5,52 +5,40 @@
 # -- HDC service image tags (auto-bumped by CI) --
 auth-service:
   image:
-    tag: "2.2.32"
-
+    tag: "2.2.37"
 metadata-service:
   image:
     tag: "2.2.13"
-
 project-service:
   image:
     tag: "2.3.9"
-
 dataops-service:
   image:
     tag: "2.5.8"
-
 notification-service:
   image:
     tag: "2.2.10"
-
 pipelinewatch-service:
   image:
     tag: "pipelinewatch-2.2.7"
-
 upload-service:
   image:
     tag: "upload-2.2.17"
-
 download-service:
   image:
     tag: "download-2.2.19"
-
 approval-service:
   image:
     tag: "2.2.9"
-
 metadata-event-handler:
   image:
     tag: "metadata_event_handler-1.0.8"
-
 search-service:
   image:
     tag: "2.2.10"
-
 portal:
   image:
     tag: "1.6.3-hdc-ovh-dev"
-
 # Note: BFF uses base-chart-hdc which requires tag in values.yaml (image.tag + tagPrefix pattern)
 # Current: bff-web:bff-2.2.75
 
@@ -58,7 +46,6 @@ portal:
 postgresql:
   image:
     tag: "16.3.0-932ab18-pgcron"
-
 keycloak:
   image:
     tag: "20.0.5-debian-11-r4"
@@ -67,11 +54,9 @@ keycloak:
 kong:
   image:
     tag: "latest"
-
 minio:
   image:
     tag: "2022.12.12-debian-11-r9"
-
 # -- Chart dependency versions --
 # Synced to Chart.yaml via: make sync-versions
 charts:
@@ -94,8 +79,8 @@ charts:
   mailhog: "5.0.7"
   notification-service: "0.3.2"
   approval-service: "0.3.1"
-  queue-service: "0.3.0"              # consumer + producer
-  queue-service-socketio: "0.4.1"    # socketio only (same chart, different version)
+  queue-service: "0.3.0" # consumer + producer
+  queue-service-socketio: "0.4.1" # socketio only (same chart, different version)
   minio: "11.7.13"
   portal: "2.1.2"
   vault: "0.31.0"
