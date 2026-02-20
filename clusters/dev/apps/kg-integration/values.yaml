@@ -1,0 +1,84 @@
+base-chart:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/kg-integration
+    tag: "1.3.32"
+    pullPolicy: IfNotPresent
+
+  fullnameOverride: kg-integration
+
+  replicaCount: 1
+
+  container:
+    port: 8000
+
+  service:
+    type: ClusterIP
+    port: 8000
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  appConfig:
+    env: dev
+    srv_namespace: service_kg
+    config_center_enabled: "false"
+    config_center_base_url: ""
+    port: "8000"
+
+  extraEnv:
+    HOST: "0.0.0.0"
+    PORT: "8000"
+    SRV_NAMESPACE: "utility"
+    # Database
+    RDS_SCHEMA_DEFAULT: "kg_integration"
+    RDS_DB: "kg_integration"
+    RDS_HOST: "postgres.utility"
+    RDS_USER: "kg_integration_user"
+    RDS_PORT: "5432"
+    # Knowledge Graph
+    KG_ENV: "ppd"
+    KG_PREFIX: "collab-"
+    KG_SERVICE_ACCOUNT_ID: "hdcclient-kg"
+    # Collaboratory
+    COLLAB_ENV: "prod"
+    COLLAB_PREFIX: "hdc-"
+    # Keycloak
+    KEYCLOAK_URL: "http://keycloak.keycloak/auth/"
+    KEYCLOAK_REALM: "hdc"
+    KEYCLOAK_BROKER: "ebrains-keycloak"
+    # Deployed services
+    AUTH_SERVICE: "http://auth.utility:5061"
+    DATASET_SERVICE: "http://dataset.utility:5081"
+    PROJECT_SERVICE: "http://project.utility:5064"
+    # Kafka
+    KAFKA_URL: "kafka-headless.utility:9092"
+    # Telemetry
+    OPEN_TELEMETRY_ENABLED: "false"
+
+  extraEnvYaml:
+    - name: RDS_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: kg-integration-credentials
+          key: db-password
+    - name: KG_SERVICE_ACCOUNT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: kg-integration-credentials
+          key: account-secret
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      cpu: 500m
+      memory: 500Mi
+
+  readinessProbe:
+    failureThreshold: 3
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    successThreshold: 1
+    tcpSocket:
+      port: 8000

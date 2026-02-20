@@ -79,6 +79,11 @@ spec:
                 secretKeyRef:
                   name: postgresql-credentials
                   key: approval-user-password
+            - name: KG_INTEGRATION_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-credentials
+                  key: kg-integration-user-password
           command:
             - /bin/bash
             - -c
@@ -206,6 +211,24 @@ spec:
               GRANT ALL PRIVILEGES ON DATABASE approval TO approval_user;
               ALTER DATABASE approval OWNER TO approval_user;
               ALTER DATABASE approval_user OWNER TO approval_user;
+              EOSQL
+
+              # kg_integration_user (named schema like metadata)
+              psql -v ON_ERROR_STOP=1 -v pwd="$KG_INTEGRATION_USER_PASSWORD" <<'EOSQL'
+              SELECT 'CREATE USER kg_integration_user WITH PASSWORD ' || quote_literal(:'pwd')
+              WHERE NOT EXISTS (SELECT FROM pg_user WHERE usename = 'kg_integration_user') \gexec
+              SELECT 'ALTER USER kg_integration_user WITH PASSWORD ' || quote_literal(:'pwd')
+              WHERE EXISTS (SELECT FROM pg_user WHERE usename = 'kg_integration_user') \gexec
+              GRANT CONNECT ON DATABASE kg_integration TO kg_integration_user;
+              \c kg_integration
+              CREATE SCHEMA IF NOT EXISTS kg_integration;
+              GRANT ALL PRIVILEGES ON SCHEMA kg_integration TO kg_integration_user;
+              GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA kg_integration TO kg_integration_user;
+              GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA kg_integration TO kg_integration_user;
+              ALTER DEFAULT PRIVILEGES IN SCHEMA kg_integration GRANT ALL ON TABLES TO kg_integration_user;
+              ALTER DEFAULT PRIVILEGES IN SCHEMA kg_integration GRANT ALL ON SEQUENCES TO kg_integration_user;
+              \c postgres
+              ALTER DATABASE kg_integration OWNER TO kg_integration_user;
               EOSQL
 
               echo "Service users created successfully!"

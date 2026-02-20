@@ -1,0 +1,7 @@
+apiVersion: v2
+name: bff-cli
+version: 0.1.0
+dependencies:
+  - name: bff-cli-service
+    version: "0.1.0"
+    repository: https://pilotdataplatform.github.io/helm-charts/

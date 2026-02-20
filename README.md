@@ -22,6 +22,7 @@ This repo uses ArgoCD's app-of-apps pattern: a root Application (`root-app.yaml`
 | 4 | keycloak-postgresql | Keycloak DB |
 | 5 | redis | |
 | 5 | kafka | Broker + Zookeeper + Connect |
+| 5 | elasticsearch | ES 7.17.3 (utility ns) |
 | 5 | mailhog | SMTP sink for dev (no auth, no ingress) |
 | 5 | minio | Object storage, S3 API ingress at `object.dev.hdc.ebrains.eu` |
 | 5 | message-bus-greenroom | RabbitMQ (greenroom ns) |
@@ -42,8 +43,12 @@ This repo uses ArgoCD's app-of-apps pattern: a root Application (`root-app.yaml`
 | 8 | upload-core | Upload service (core ns) |
 | 8 | download-greenroom | Download service (greenroom ns) |
 | 8 | download-core | Download service (core ns) |
+| 8 | search | Search service (ES-backed) |
 | 9 | kong | API gateway |
-| 10 | bff | Backend-for-frontend |
+| 9 | metadata-event-handler | Kafka→ES event indexer |
+| 9 | kg-integration | EBRAINS Knowledge Graph integration |
+| 10 | bff | Backend-for-frontend (web) |
+| 10 | bff-cli | Backend-for-frontend (CLI) |
 | 11 | portal | Frontend UI |
 
 **Note**: `registry-secrets` (wave 3) will show `SecretSyncError` until Vault is unsealed and the ClusterSecretStore can connect to it — expected on first deploy, resolves via `selfHeal: true`.
@@ -136,15 +141,17 @@ vault kv put secret/minio \
 
 | Path | Keys | Used By |
 |------|------|---------|
-| `secret/postgresql` | postgres-password, {metadata,project,auth,dataops,dataset,notification,approval}-user-password | postgresql, init-job, metadata, project, auth, dataops, dataset, notification, approval |
+| `secret/postgresql` | postgres-password, {metadata,project,auth,dataops,dataset,notification,approval,kg-integration}-user-password | postgresql, init-job, metadata, project, auth, dataops, dataset, notification, approval, kg-integration |
 | `secret/minio` | access_key, secret_key, kms_secret_key | minio, bff, dataset, queue-consumer, upload-greenroom, upload-core, download-greenroom, download-core |
 | `secret/keycloak` | admin-password, postgres-password | keycloak, keycloak-postgresql |
-| `secret/redis` | password | redis, auth, bff, dataops, approval, dataset, queue-consumer, upload-greenroom, upload-core |
+| `secret/redis` | password | redis, auth, bff, bff-cli, dataops, approval, dataset, queue-consumer, upload-greenroom, upload-core |
 | `secret/auth` | keycloak-client-secret | auth |
 | `secret/approval` | db-uri | approval init container (psql + alembic) |
 | `secret/kong` | postgres-password, postgres-user | kong-postgresql |
 | `secret/rabbitmq` | username, password | message-bus-greenroom, queue-consumer, queue-producer, queue-socketio |
 | `secret/download` | download-key | download-greenroom, download-core |
+| `secret/kg-integration` | account-secret | kg-integration |
+| `secret/bff-cli` | cli-secret, atlas-password, guacamole-jwt-public-key | bff-cli |
 | `secret/docker-registry/ovh` | username, password | registry-secrets |
 
 To add or update a service password: `vault kv patch secret/postgresql <service>-user-password=<value>`

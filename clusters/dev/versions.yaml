@@ -36,6 +36,9 @@ metadata-event-handler:
 search-service:
   image:
     tag: "2.2.10"
+bff-cli-service:
+  image:
+    tag: "bff-cli-2.2.15"
 portal:
   image:
     tag: "1.6.3-hdc-ovh-dev"
@@ -90,3 +93,5 @@ charts:
   download-service: "1.0.6"
   metadata-event-handler: "0.1.1"
   search-service: "0.2.2"
+  base-chart: "0.1.0"
+  bff-cli-service: "0.1.0"

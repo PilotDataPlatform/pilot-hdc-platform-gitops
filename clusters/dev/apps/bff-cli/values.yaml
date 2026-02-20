@@ -1,0 +1,106 @@
+bff-cli-service:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/bff-cli
+    pullPolicy: IfNotPresent
+
+  fullnameOverride: bff-cli
+  replicaCount: 1
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  container:
+    port: 5080
+
+  service:
+    type: ClusterIP
+    port: 5080
+    targetPort: 5080
+
+  appConfig:
+    port: 5080
+    env: dev
+    config_center_enabled: "false"
+    config_center_base_url: "http://common.utility:5062/"
+    srv_namespace: service_bff-cli
+
+  extraEnv:
+    log_level: info
+    namespace: utility
+    OPEN_TELEMETRY_ENABLED: "false"
+
+    # Deployed services
+    UPLOAD_SERVICE_CORE: "http://upload.core:5079"
+    UPLOAD_SERVICE_GREENROOM: "http://upload.greenroom:5079"
+    DOWNLOAD_SERVICE_CORE: "http://download.core:5077"
+    DOWNLOAD_SERVICE_GREENROOM: "http://download.greenroom:5077"
+    DATASET_SERVICE: "http://dataset.utility:5081"
+    AUTH_SERVICE: "http://auth.utility:5061"
+    METADATA_SERVICE: "http://metadata.utility:5066"
+    PROJECT_SERVICE: "http://project.utility:5064"
+
+    # Redis
+    REDIS_HOST: "redis-master.redis"
+    REDIS_PORT: "6379"
+    REDIS_DB: "0"
+
+    # Zone labels
+    CORE_ZONE_LABEL: "Core"
+    GREEN_ZONE_LABEL: "Greenroom"
+
+    # TODO: fill when these services are deployed on OVH
+    AUDIT_TRAIL_SERVICE: ""
+    HPC_SERVICE: ""
+    KG_SERVICE: ""
+    ATLAS_API: ""
+    ATLAS_ADMIN: "admin"
+    ATLAS_ENTITY_TYPE: ""
+
+    # Guacamole CLI auth
+    CLI_PUBLIC_KEY_PATH: "/var/run/secrets/guacamole/jwt-key.pub"
+
+    # TODO: replace with OVH pod CIDR when JupyterHub is deployed
+    JUPYTER_IP_LOWER: "10.0.0.0"
+    JUPYTER_IP_UPPER: "10.255.255.255"
+
+  extraEnvYaml:
+    - name: REDIS_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: bff-cli-credentials
+          key: redis-password
+    - name: CLI_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: bff-cli-credentials
+          key: cli-secret
+    - name: ATLAS_PASSWD
+      valueFrom:
+        secretKeyRef:
+          name: bff-cli-credentials
+          key: atlas-password
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      cpu: 500m
+      memory: 500Mi
+
+  readinessProbe:
+    tcpSocket:
+      port: 5080
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    failureThreshold: 3
+    successThreshold: 1
+
+  extraVolumeMounts:
+    - name: guacamole-vm-key-pair
+      mountPath: /var/run/secrets/guacamole/
+      readOnly: true
+  extraVolumes:
+    - name: guacamole-vm-key-pair
+      secret:
+        secretName: guacamole-vm-key-pair
