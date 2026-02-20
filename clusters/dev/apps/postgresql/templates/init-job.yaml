@@ -116,6 +116,7 @@ spec:
               WHERE EXISTS (SELECT FROM pg_user WHERE usename = 'metadata_user') \gexec
               GRANT CONNECT ON DATABASE metadata TO metadata_user;
               \c metadata
+              ALTER SCHEMA metadata OWNER TO metadata_user;
               GRANT ALL PRIVILEGES ON SCHEMA metadata TO metadata_user;
               GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA metadata TO metadata_user;
               GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA metadata TO metadata_user;
@@ -222,6 +223,7 @@ spec:
               GRANT CONNECT ON DATABASE kg_integration TO kg_integration_user;
               \c kg_integration
               CREATE SCHEMA IF NOT EXISTS kg_integration;
+              ALTER SCHEMA kg_integration OWNER TO kg_integration_user;
               GRANT ALL PRIVILEGES ON SCHEMA kg_integration TO kg_integration_user;
               GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA kg_integration TO kg_integration_user;
               GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA kg_integration TO kg_integration_user;
