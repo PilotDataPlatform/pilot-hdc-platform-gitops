@@ -52,7 +52,7 @@ project-service:
     ICON_SIZE_LIMIT: "16777216"
 
   extraEnvYaml:
-    - name: OPSDB_UTILITY_PASSWORD
+    - name: RDS_DB_PASSWORD
       valueFrom:
         secretKeyRef:
           name: project-credentials
