@@ -1,0 +1,7 @@
+apiVersion: v2
+name: kg-integration
+version: 0.1.0
+dependencies:
+  - name: base-chart
+    version: "0.1.0"
+    repository: https://pilotdataplatform.github.io/helm-charts/
