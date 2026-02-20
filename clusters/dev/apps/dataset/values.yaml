@@ -86,15 +86,7 @@ base-chart-hdc:
     REDIS_HOST: "redis-master.redis"
     REDIS_PORT: "6379"
     REDIS_DB: "0"
-    # Undeployed services - localhost placeholders
-    NEO4J_SERVICE: "http://localhost:5062"
-    CATALOGUING_SERVICE: "http://localhost:5064"
-    ENTITYINFO_SERVICE: "http://localhost:5066"
-    ELASTIC_SEARCH_SERVICE: "http://localhost:9200"
-    UTILITY_SERVICE: "http://localhost:5062"
-    DATA_OPS_UTIL: "http://localhost:5063"
-    SEND_MESSAGE_URL: "http://localhost:6060"
-    LINEAGE_SERVICE: "http://localhost:5064"
+    DATA_OPS_UTIL: "http://dataops.utility:5063"
     # Misc
     DOWNLOAD_TOKEN_EXPIRE_AT: "5"
     MAX_PREVIEW_SIZE: "500000"

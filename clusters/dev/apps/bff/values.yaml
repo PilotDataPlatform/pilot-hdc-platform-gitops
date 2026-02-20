@@ -63,16 +63,17 @@ base-chart-hdc:
     AUTH_SERVICE: "http://auth.utility:5061"
     METADATA_SERVICE: "http://metadata.utility:5066"
     PROJECT_SERVICE: "http://project.utility:5064"
-    # Undeployed services - localhost placeholders
-    DATAOPS_SERVICE: "http://localhost:5063"
-    UPLOAD_SERVICE: "http://localhost:5079"
-    DOWNLOAD_SERVICE_CORE: "http://localhost:5077"
-    DOWNLOAD_SERVICE_GR: "http://localhost:5077"
-    NOTIFY_SERVICE: "http://localhost:5065"
-    DATASET_SERVICE: "http://localhost:5081"
-    KG_SERVICE: "http://localhost:8000"
-    APPROVAL_SERVICE: "http://localhost:8000"
-    SEARCH_SERVICE: "http://localhost:5064"
+    # Services
+    DATAOPS_SERVICE: "http://dataops.utility:5063"
+    UPLOAD_SERVICE: "http://upload.greenroom:5079"
+    DOWNLOAD_SERVICE_CORE: "http://download.core:5077"
+    DOWNLOAD_SERVICE_GR: "http://download.greenroom:5077"
+    NOTIFY_SERVICE: "http://notification.utility:5065"
+    DATASET_SERVICE: "http://dataset.utility:5081"
+    KG_SERVICE: "http://kg-integration.utility:8000"
+    APPROVAL_SERVICE: "http://approval.utility:8000"
+    SEARCH_SERVICE: "http://search.utility:5064"
+    # TODO: not deployed on OVH yet
     WORKSPACE_SERVICE: "http://localhost:5068"
     PROVENANCE_SERVICE: "http://localhost:5077"
     # MinIO
