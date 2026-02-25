@@ -1,0 +1,7 @@
+apiVersion: v2
+name: workspace
+version: 0.1.0
+dependencies:
+  - name: workspace-service
+    version: "0.2.0"
+    repository: https://pilotdataplatform.github.io/helm-charts/
