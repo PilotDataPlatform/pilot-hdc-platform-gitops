@@ -3,7 +3,7 @@ APPS := registry-secrets greenroom-storage core-storage nfs-provisioner postgres
 REGISTRY_DIR := clusters/dev
 VERSIONS_FILE := clusters/dev/versions.yaml
 
-.PHONY: helm-deps helm-test-eso helm-test-image helm-test-versions helm-test-envdup helm-test-pullsecrets helm-test-envvars-rendered helm-test-regsecret-coverage sync-versions test clean switch-registry which-registry
+.PHONY: helm-deps helm-test-eso helm-test-image helm-test-versions helm-test-envdup helm-test-pullsecrets helm-test-envvars-rendered helm-test-regsecret-coverage sync-versions sync-rsa-key test clean switch-registry which-registry
 
 EXPECTED_REGISTRY := $(shell grep 'imageRegistry:' $(REGISTRY_DIR)/registry.yaml 2>/dev/null | awk '{print $$2}')
 
@@ -58,6 +58,10 @@ helm-test-image: helm-deps
 # Workflow: bump version in versions.yaml → make sync-versions → commit both files.
 sync-versions:
 	@bash scripts/sync-chart-versions.sh
+
+# Sync RSA_PUBLIC_KEY from Keycloak terraform output into values.yaml files
+sync-rsa-key:
+	@bash scripts/sync-rsa-public-key.sh
 
 # Verify image tags rendered by helm template match versions.yaml
 helm-test-versions: helm-deps
