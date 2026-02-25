@@ -156,6 +156,86 @@ vault kv put secret/minio \
 
 To add or update a service password: `vault kv patch secret/postgresql <service>-user-password=<value>`
 
+## Platform Architecture (WIP)
+
+HDC splits workloads across namespaces by trust boundary and function:
+
+| Namespace | Purpose | Key Services |
+|-----------|---------|-------------|
+| `utility` | Most HDC services + shared infra | auth, metadata, project, dataops, dataset, approval, notification, search, bff, bff-cli, portal, kong, postgresql, kafka, elasticsearch, mailhog, kong-postgresql |
+| `greenroom` | Pre-approval zone (untrusted data) | upload, download, queue-consumer/producer/socketio, pipelinewatch, RabbitMQ, RWX PVC |
+| `core` | Post-approval zone (approved data) | upload, download, RWX PVC |
+| `keycloak` | Identity provider | Keycloak + dedicated PostgreSQL |
+| `vault` | Secrets management | HashiCorp Vault |
+| `minio` | Object storage | MinIO (S3-compatible) |
+| `redis` | Cache/session store | Redis |
+| `argocd` | GitOps controller | ArgoCD |
+| `ingress-nginx` | Ingress | NGINX ingress controller |
+| `cert-manager` | TLS | cert-manager |
+| `external-secrets` | Secret sync | External Secrets Operator → Vault |
+| `nfs-provisioner` | Storage | NFS StorageClass for RWX PVCs |
+
+**High-level data flow**: Portal → BFF → Kong (API gateway) → HDC microservices → backing stores (PostgreSQL, Redis, Kafka, Elasticsearch, MinIO). Files land in the `greenroom` zone first, move to `core` after approval. Keycloak handles authentication, Vault stores all secrets synced via ESO.
+
+## Development
+
+### Prerequisites
+
+- [Helm](https://helm.sh/) 3.x
+- [yq](https://github.com/mikefarah/yq) v4+
+- `make`
+- `kubectl` (for cluster operations)
+- `vault` CLI (for secret management)
+
+### Version Management
+
+All image tags and chart dependency versions are centralized in [`clusters/dev/versions.yaml`](clusters/dev/versions.yaml).
+
+```bash
+# 1. Edit versions.yaml (image tag or chart version)
+vim clusters/dev/versions.yaml
+
+# 2. For chart version changes, propagate to Chart.yaml files
+make sync-versions
+
+# 3. Validate
+make test
+
+# 4. Commit both versions.yaml and any updated Chart.yaml files
+```
+
+Image tags are consumed as a Helm valueFile — ArgoCD deep-merges `registry.yaml → versions.yaml → values.yaml`. Chart dependency versions can't be set via Helm values, so `make sync-versions` bridges the gap by updating each `Chart.yaml` via yq.
+
+### Registry Switching
+
+The repo supports multiple container registries (OVH, EBRAINS). The active registry is set in `clusters/dev/registry.yaml`.
+
+```bash
+make which-registry              # show current registry
+make switch-registry TO=ovh      # switch to OVH registry
+make switch-registry TO=ebrains  # switch to EBRAINS registry
+```
+
+This updates `registry.yaml` and rewrites hardcoded registry URLs in app `values.yaml` files.
+
+### Validation
+
+Run `make test` before committing. It runs all checks:
+
+| Test | What it catches |
+|------|----------------|
+| `helm-test-eso` | ESO template variables not preserved (Helm eating `{{ }}`) |
+| `helm-test-image` | Images pulling from wrong registry |
+| `helm-test-versions` | Image tags not matching `versions.yaml` |
+| `helm-test-envdup` | Duplicate env vars (rejected by ServerSideApply) |
+| `helm-test-pullsecrets` | Missing `imagePullSecrets` on pod specs |
+| `helm-test-envvars-rendered` | Env vars defined in values but not rendered by chart |
+| `helm-test-regsecret-coverage` | Namespaces missing docker-registry-secret |
+
+### Additional Resources
+
+- [`docs/`](docs/) — Operational scripts and runbooks (e.g., PostgreSQL validation)
+
 ## Acknowledgements
 The development of the HealthDataCloud open source software was supported by the EBRAINS research infrastructure, funded from the European Union's Horizon 2020 Framework Programme for Research and Innovation under the Specific Grant Agreement No. 945539 (Human Brain Project SGA3) and H2020 Research and Innovation Action Grant Interactive Computing E-Infrastructure for the Human Brain Project ICEI 800858.
 
