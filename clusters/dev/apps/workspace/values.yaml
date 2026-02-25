@@ -1,0 +1,75 @@
+workspace-service:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/workspace
+    pullPolicy: IfNotPresent
+    # chart prepends "workspace-" to tag automatically
+
+  fullnameOverride: workspace
+  replicaCount: 1
+
+  container:
+    port: 5068
+
+  service:
+    type: ClusterIP
+    port: 5068
+    targetPort: 5068
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  appConfig:
+    port: 5068
+    env: dev
+    config_center_enabled: "false"
+    config_center_base_url: "http://common.utility:5062/"
+    srv_namespace: service_workspace
+
+  extraEnv:
+    AUTH_SERVICE: "http://auth.utility:5061"
+    GUACAMOLE_HOSTNAME: "dev.hdc.ebrains.eu"
+    GUACAMOLE_URL_PATH: "/workbench/{container_code}/guacamole"
+
+  extraEnvYaml:
+    - name: GUACAMOLE_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: workspace-credentials
+          key: guacamole-username
+    - name: GUACAMOLE_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: workspace-credentials
+          key: guacamole-password
+
+  resources:
+    limits:
+      cpu: "1"
+      memory: 1000Mi
+    requests:
+      cpu: 10m
+      memory: 50Mi
+
+  readinessProbe:
+    failureThreshold: 3
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    successThreshold: 1
+    tcpSocket:
+      port: 5068
+
+  livenessProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /v1/health
+      port: 5068
+      scheme: HTTP
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 3
+
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 33%

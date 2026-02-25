@@ -39,6 +39,9 @@ search-service:
 bff-cli-service:
   image:
     tag: "bff-cli-2.2.15"
+workspace-service:
+  image:
+    tag: "2.2.7"
 portal:
   image:
     tag: "1.6.3-hdc-ovh-dev"
@@ -95,3 +98,4 @@ charts:
   search-service: "0.2.2"
   base-chart: "0.1.0"
   bff-cli-service: "0.1.0"
+  workspace-service: "0.2.0"
