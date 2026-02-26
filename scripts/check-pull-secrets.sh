@@ -13,9 +13,17 @@ if [[ $# -eq 0 ]]; then
   exit 1
 fi
 
+# Apps where the upstream chart has no imagePullSecrets support.
+# These rely on ServiceAccount-level imagePullSecrets (patched by registry-secrets).
+SKIP_APPS="xwiki"
+
 failed=0
 
 for app in "$@"; do
+  if [[ " $SKIP_APPS " == *" $app "* ]]; then
+    echo "⊘ $app: skipped (SA-level imagePullSecrets)"
+    continue
+  fi
   vfiles=(-f "$REGISTRY_DIR/registry.yaml" -f "$VERSIONS_FILE")
   [[ -f "$APPS_DIR/$app/values.yaml" ]] && vfiles+=(-f "$APPS_DIR/$app/values.yaml")
 

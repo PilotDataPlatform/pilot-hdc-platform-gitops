@@ -46,6 +46,7 @@ declare -A CHART_TO_DIRS=(
   [base-chart]="kg-integration"
   [bff-cli-service]="bff-cli"
   [workspace-service]="workspace"
+  [xwiki]="xwiki"
 )
 
 # When the versions.yaml key differs from the Chart.yaml dependency name

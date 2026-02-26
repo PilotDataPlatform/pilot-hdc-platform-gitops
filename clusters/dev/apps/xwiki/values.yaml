@@ -1,0 +1,80 @@
+xwiki:
+  replicaCount: 1
+
+  overrides:
+    image: true
+
+  image:
+    name: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/xwiki
+    pullPolicy: IfNotPresent
+
+  mysql:
+    enabled: false
+
+  postgresql:
+    enabled: true
+    postgresqlUsername: xwiki
+    postgresqlDatabase: xwiki
+    existingSecret: xwiki-postgresql
+    image:
+      repository: hdc-services-external/bitnami/postgresql
+      tag: 11.3.0-debian-9-r38
+    volumePermissions:
+      image:
+        repository: hdc-services-external/bitnami/minideb
+        tag: stretch
+    persistence:
+      storageClass: nfs-client
+      size: 1Gi
+
+  service:
+    type: ClusterIP
+
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/affinity: cookie
+      nginx.ingress.kubernetes.io/proxy-body-size: 100m
+      nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    hostname: xwiki.dev.hdc.ebrains.eu
+    path: /
+    pathType: Prefix
+    tls: true
+
+  # Chart-managed PVC (hardcoded name "xwiki", mounts at /opt/solr/server/solr)
+  # Can't disable — keep small and ignore
+  storageClass: nfs-client
+  storage: 1Gi
+
+  solr:
+    enabled: false
+
+  # Volume name "xwiki-conf" avoids collision with chart built-in volume "xwiki-data"
+  extraVolumes:
+    - name: xwiki-config
+      secret:
+        secretName: xwiki-config
+    - name: xwiki-conf
+      persistentVolumeClaim:
+        claimName: xwiki-data
+
+  extraVolumeMounts:
+    - name: xwiki-conf
+      mountPath: /usr/local/xwiki/data
+    - name: xwiki-config
+      mountPath: /usr/local/xwiki/data/xwiki.cfg
+      subPath: xwiki.cfg
+    - name: xwiki-config
+      mountPath: /usr/local/xwiki/data/xwiki.properties
+      subPath: xwiki.properties
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: "2"
+      memory: 3Gi
