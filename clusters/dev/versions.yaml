@@ -102,4 +102,4 @@ charts:
   base-chart: "0.1.0"
   bff-cli-service: "0.1.0"
   workspace-service: "0.2.0"
-  xwiki: "0.2.1"
+  xwiki: "0.3.0"
