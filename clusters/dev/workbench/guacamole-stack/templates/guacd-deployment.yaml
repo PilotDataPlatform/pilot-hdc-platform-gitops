@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guacd
+  labels:
+    app.kubernetes.io/name: guacd
+    {{- include "guacamole-stack.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.guacd.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: guacd
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: guacd
+        {{- include "guacamole-stack.labels" . | nindent 8 }}
+    spec:
+      imagePullSecrets:
+        - name: docker-registry-secret
+      containers:
+        - name: guacd
+          image: "{{ .Values.global.imageRegistry }}/{{ .Values.guacd.image.repository }}:{{ .Values.guacd.image.tag }}"
+          imagePullPolicy: {{ .Values.guacd.image.pullPolicy }}
+          ports:
+            - name: guacd
+              containerPort: 4822
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: guacd
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: guacd
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.guacd.resources | nindent 12 }}

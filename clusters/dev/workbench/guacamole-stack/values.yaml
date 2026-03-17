@@ -1,0 +1,100 @@
+projectName: ""
+domain: "dev.hdc.ebrains.eu"
+
+# Image tags pinned here (not in versions.yaml) — upstream Apache releases, not HDC-built
+guacd:
+  image:
+    repository: hdc-services-external/guacamole/guacd
+    tag: "1.2.0"
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 10m
+      memory: 64Mi
+
+guacamole:
+  image:
+    repository: hdc-services-external/guacamole/guacamole
+    tag: "1.2.0"
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: "1"
+      memory: 1Gi
+    requests:
+      cpu: 10m
+      memory: 128Mi
+
+guacamoleProperties:
+  postgresqlAbsoluteMaxConnections: 100
+
+oidc:
+  scope: "openid username email profile groups"
+  usernameClaim: "username"
+
+ingress:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/proxy-body-size: 20m
+    nginx.ingress.kubernetes.io/proxy-buffering: "on"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: 512k
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
+
+vaultPgPath: secret/data/guacamole
+
+guacamole-postgresql:
+  fullnameOverride: postgres-guacamole
+  global:
+    imagePullSecrets:
+      - docker-registry-secret
+    postgresql:
+      auth:
+        database: guacamole_db
+        username: guacamole_user
+        existingSecret: guacamole-pg-credentials
+        secretKeys:
+          adminPasswordKey: postgres-password
+          userPasswordKey: password
+  image:
+    repository: hdc-services-external/bitnami/postgresql
+  architecture: standalone
+  primary:
+    pgHbaConfiguration: |-
+      local all all trust
+      host all all 127.0.0.1/32 trust
+      host all all ::1/128 trust
+      host all all 0.0.0.0/0 md5
+      host all all ::/0 md5
+    extendedConfiguration: |-
+      password_encryption = md5
+    initdb:
+      scripts:
+        00-init-guacamole.sh: |
+          #!/bin/bash
+          set -e
+          export PGPASSWORD=$POSTGRES_PASSWORD
+          psql -U postgres -d guacamole_db -f /tmp/guacamole-schema/initdb.sql
+    extraVolumeMounts:
+      - name: guacamole-schema
+        mountPath: /tmp/guacamole-schema
+    extraVolumes:
+      - name: guacamole-schema
+        configMap:
+          name: guacamole-pg-schema
+    persistence:
+      size: 2Gi
+      storageClass: "csi-cinder-high-speed"
+    resources:
+      limits:
+        cpu: 500m
+        memory: 256Mi
+      requests:
+        cpu: 10m
+        memory: 64Mi

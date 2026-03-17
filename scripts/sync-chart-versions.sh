@@ -47,12 +47,14 @@ declare -A CHART_TO_DIRS=(
   [bff-cli-service]="bff-cli"
   [workspace-service]="workspace"
   [xwiki]="xwiki"
+  [guacamole-postgresql]="../workbench/guacamole-stack"
 )
 
 # When the versions.yaml key differs from the Chart.yaml dependency name
 # e.g. queue-service-socketio in versions.yaml → queue-service in Chart.yaml
 declare -A DEP_NAME_OVERRIDE=(
   [queue-service-socketio]="queue-service"
+  [guacamole-postgresql]="postgresql"
 )
 
 changed=0

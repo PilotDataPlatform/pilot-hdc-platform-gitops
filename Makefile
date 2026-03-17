@@ -2,8 +2,10 @@ APPS_DIR := clusters/dev/apps
 APPS := registry-secrets greenroom-storage core-storage nfs-provisioner postgresql keycloak-postgresql kong-postgresql redis kafka elasticsearch message-bus-greenroom keycloak auth metadata project dataops dataset approval kong bff minio mailhog notification portal queue-consumer queue-producer queue-socketio pipelinewatch upload-greenroom upload-core download-greenroom download-core metadata-event-handler search kg-integration bff-cli workspace xwiki
 REGISTRY_DIR := clusters/dev
 VERSIONS_FILE := clusters/dev/versions.yaml
+WORKBENCH_DIR := clusters/dev/workbench
+WORKBENCH_CHARTS := guacamole-stack
 
-.PHONY: helm-deps helm-test-eso helm-test-image helm-test-versions helm-test-envdup helm-test-pullsecrets helm-test-envvars-rendered helm-test-regsecret-coverage sync-versions sync-rsa-key test clean switch-registry which-registry
+.PHONY: helm-deps helm-deps-workbench helm-test-eso helm-test-image helm-test-versions helm-test-envdup helm-test-pullsecrets helm-test-envvars-rendered helm-test-regsecret-coverage helm-test-workbench sync-versions sync-rsa-key test clean switch-registry which-registry
 
 EXPECTED_REGISTRY := $(shell grep 'imageRegistry:' $(REGISTRY_DIR)/registry.yaml 2>/dev/null | awk '{print $$2}')
 
@@ -12,6 +14,13 @@ helm-deps:
 	@for app in $(APPS); do \
 		echo "Building deps for $$app..."; \
 		helm dependency build --skip-refresh $(APPS_DIR)/$$app; \
+	done
+
+# Build helm dependencies for workbench charts
+helm-deps-workbench:
+	@for chart in $(WORKBENCH_CHARTS); do \
+		echo "Building deps for workbench/$$chart..."; \
+		helm dependency build --skip-refresh $(WORKBENCH_DIR)/$$chart; \
 	done
 
 # Test ExternalSecret templates render ESO variables correctly
@@ -125,11 +134,57 @@ helm-test-regsecret-coverage: helm-deps
 	@echo "Testing registry-secret namespace coverage..."
 	@bash scripts/check-registry-secret-coverage.sh $(APPS)
 
-test: helm-test-eso helm-test-image helm-test-versions helm-test-envdup helm-test-pullsecrets helm-test-envvars-rendered helm-test-regsecret-coverage
+# Test workbench charts render correctly
+helm-test-workbench: helm-deps-workbench
+	@echo "Testing workbench charts..."
+	@failed=0; \
+	for chart in $(WORKBENCH_CHARTS); do \
+		echo "--- $$chart ---"; \
+		output=$$(helm template test $(WORKBENCH_DIR)/$$chart \
+			-f $(REGISTRY_DIR)/registry.yaml \
+			-f $(WORKBENCH_DIR)/$$chart/values.yaml \
+			--set projectName=testproject \
+			--set domain=dev.hdc.ebrains.eu \
+			--skip-tests 2>&1); \
+		if [ $$? -ne 0 ]; then \
+			echo "✗ $$chart: helm template failed"; \
+			echo "$$output"; \
+			failed=1; \
+			continue; \
+		fi; \
+		images=$$(echo "$$output" | grep -E '^\s+image:' | awk '{print $$2}' | tr -d '"' | sort -u); \
+		for img in $$images; do \
+			if echo "$$img" | grep -q "^$(EXPECTED_REGISTRY)/"; then \
+				echo "✓ $$chart: $$img"; \
+			else \
+				echo "✗ $$chart: $$img (expected $(EXPECTED_REGISTRY))"; \
+				failed=1; \
+			fi; \
+		done; \
+		if echo "$$output" | grep -q '{{ .username }}' && \
+		   echo "$$output" | grep -q '{{ .password }}'; then \
+			echo "✓ $$chart: ESO template variables preserved"; \
+		else \
+			echo "✗ $$chart: ESO template variables NOT preserved"; \
+			failed=1; \
+		fi; \
+		if echo "$$output" | grep -q 'imagePullSecrets'; then \
+			echo "✓ $$chart: imagePullSecrets present"; \
+		else \
+			echo "✗ $$chart: imagePullSecrets missing"; \
+			failed=1; \
+		fi; \
+	done; \
+	exit $$failed
+
+test: helm-test-eso helm-test-image helm-test-versions helm-test-envdup helm-test-pullsecrets helm-test-envvars-rendered helm-test-regsecret-coverage helm-test-workbench
 
 clean:
 	@for app in $(APPS); do \
 		rm -rf $(APPS_DIR)/$$app/charts $(APPS_DIR)/$$app/Chart.lock; \
+	done
+	@for chart in $(WORKBENCH_CHARTS); do \
+		rm -rf $(WORKBENCH_DIR)/$$chart/charts $(WORKBENCH_DIR)/$$chart/Chart.lock; \
 	done
 
 # Registry switching: make switch-registry TO=ovh|ebrains

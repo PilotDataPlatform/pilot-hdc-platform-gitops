@@ -103,3 +103,4 @@ charts:
   bff-cli-service: "0.1.0"
   workspace-service: "0.2.0"
   xwiki: "0.3.0"
+  guacamole-postgresql: "15.5.17"
