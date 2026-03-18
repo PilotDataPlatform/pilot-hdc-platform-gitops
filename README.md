@@ -71,7 +71,25 @@ Adding a project file triggers ApplicationSets to create per-project instances o
 
 The `projects/` directory is shared across all workbench ApplicationSets — future services (Superset, JupyterHub) will read from the same catalog.
 
-**Safety**: ApplicationSets use `applicationsSync: create-update` (removing a project file does NOT delete the Application) and `prune: false` (no accidental PVC deletion). No finalizers on stateful apps.
+#### Adding a new project
+
+1. Create `clusters/dev/workbench/projects/<name>.yaml` with `name: <name>`
+2. Ensure prerequisites exist:
+   - Vault secret: `vault kv put secret/guacamole pg-password=$(openssl rand -hex 24)`
+   - Keycloak client: `guacamole-<name>` (managed in Terraform)
+3. Commit and push to `main` — ArgoCD creates all per-project Applications automatically
+
+Each project gets: namespace `project-<name>`, its own PostgreSQL, ESO secrets, and ingress at `/workbench/<name>/guacamole/`.
+
+#### Removing a project
+
+Removing a project file does **not** delete the ArgoCD Application or its resources (`applicationsSync: create-update`). To fully decommission:
+
+1. Delete the project file and push
+2. Delete the Application in ArgoCD (resources become orphaned)
+3. Manual cleanup: `kubectl delete ns project-<name>`
+
+**Safety**: `prune: false` on generated Applications — no accidental PVC/StatefulSet deletion. No finalizers on stateful apps.
 
 ### Prerequisites
 - Vault must be unsealed and initialized before apps in wave 3+ can sync
