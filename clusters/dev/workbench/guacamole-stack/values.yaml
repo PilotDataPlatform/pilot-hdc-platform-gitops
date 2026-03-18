@@ -1,5 +1,6 @@
 projectName: ""
 domain: "dev.hdc.ebrains.eu"
+keycloakDomain: "iam.dev.hdc.ebrains.eu"
 
 # Image tags pinned here (not in versions.yaml) — upstream Apache releases, not HDC-built
 guacd:

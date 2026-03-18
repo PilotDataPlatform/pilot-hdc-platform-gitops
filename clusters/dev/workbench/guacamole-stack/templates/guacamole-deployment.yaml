@@ -50,11 +50,11 @@ spec:
             - name: POSTGRES_ABSOLUTE_MAX_CONNECTIONS
               value: "{{ .Values.guacamoleProperties.postgresqlAbsoluteMaxConnections }}"
             - name: OPENID_AUTHORIZATION_ENDPOINT
-              value: https://{{ .Values.domain }}/auth/realms/hdc/protocol/openid-connect/auth
+              value: https://{{ .Values.keycloakDomain }}/realms/hdc/protocol/openid-connect/auth
             - name: OPENID_JWKS_ENDPOINT
-              value: https://{{ .Values.domain }}/auth/realms/hdc/protocol/openid-connect/certs
+              value: https://{{ .Values.keycloakDomain }}/realms/hdc/protocol/openid-connect/certs
             - name: OPENID_ISSUER
-              value: https://{{ .Values.domain }}/auth/realms/hdc
+              value: https://{{ .Values.keycloakDomain }}/realms/hdc
             - name: OPENID_CLIENT_ID
               value: guacamole-{{ .Values.projectName }}
             - name: OPENID_REDIRECT_URI
