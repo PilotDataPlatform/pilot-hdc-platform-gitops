@@ -103,3 +103,4 @@ charts:
   workspace-service: "0.2.0"
   xwiki: "0.3.0"
   guacamole-postgresql: "15.5.17"
+  jupyterhub: "3.3.8"

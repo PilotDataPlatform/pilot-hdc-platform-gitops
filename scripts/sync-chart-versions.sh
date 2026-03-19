@@ -48,6 +48,7 @@ declare -A CHART_TO_DIRS=(
   [workspace-service]="workspace"
   [xwiki]="xwiki"
   [guacamole-postgresql]="../workbench/guacamole-stack"
+  [jupyterhub]="../workbench/jupyterhub"
 )
 
 # When the versions.yaml key differs from the Chart.yaml dependency name

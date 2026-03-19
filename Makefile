@@ -3,7 +3,7 @@ APPS := registry-secrets greenroom-storage core-storage nfs-provisioner postgres
 REGISTRY_DIR := clusters/dev
 VERSIONS_FILE := clusters/dev/versions.yaml
 WORKBENCH_DIR := clusters/dev/workbench
-WORKBENCH_CHARTS := guacamole-stack superset
+WORKBENCH_CHARTS := guacamole-stack superset jupyterhub
 
 .PHONY: helm-deps helm-deps-workbench helm-test-eso helm-test-image helm-test-versions helm-test-envdup helm-test-pullsecrets helm-test-envvars-rendered helm-test-regsecret-coverage helm-test-workbench sync-versions sync-rsa-key test clean switch-registry which-registry
 
