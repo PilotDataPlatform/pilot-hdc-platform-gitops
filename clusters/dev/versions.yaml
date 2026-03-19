@@ -45,8 +45,7 @@ workspace-service:
 portal:
   image:
     tag: "1.6.3-hdc-ovh-dev"
-# Note: BFF uses base-chart-hdc which requires tag in values.yaml (image.tag + tagPrefix pattern)
-# Current: bff-web:bff-2.2.75
+# BFF and dataset use base-chart-hdc — tags managed in their values.yaml by CI (update_gitops_versions.yml)
 
 # -- Infrastructure image tags (manually managed) --
 postgresql:

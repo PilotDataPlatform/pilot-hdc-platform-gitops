@@ -3,7 +3,7 @@ APPS := registry-secrets greenroom-storage core-storage nfs-provisioner postgres
 REGISTRY_DIR := clusters/dev
 VERSIONS_FILE := clusters/dev/versions.yaml
 WORKBENCH_DIR := clusters/dev/workbench
-WORKBENCH_CHARTS := guacamole-stack
+WORKBENCH_CHARTS := guacamole-stack superset
 
 .PHONY: helm-deps helm-deps-workbench helm-test-eso helm-test-image helm-test-versions helm-test-envdup helm-test-pullsecrets helm-test-envvars-rendered helm-test-regsecret-coverage helm-test-workbench sync-versions sync-rsa-key test clean switch-registry which-registry
 
@@ -152,7 +152,7 @@ helm-test-workbench: helm-deps-workbench
 			failed=1; \
 			continue; \
 		fi; \
-		images=$$(echo "$$output" | grep -E '^\s+image:' | awk '{print $$2}' | tr -d '"' | sort -u); \
+		images=$$(echo "$$output" | grep -E '^\s+image:' | awk '{print $$2}' | tr -d "\"'" | sort -u); \
 		for img in $$images; do \
 			if echo "$$img" | grep -q "^$(EXPECTED_REGISTRY)/"; then \
 				echo "✓ $$chart: $$img"; \
