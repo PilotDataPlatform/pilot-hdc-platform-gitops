@@ -38,7 +38,7 @@ spec:
             - name: domain
               value: 'dev.hdc.ebrains.eu'
             - name: jupyterhub.hub.baseUrl
-              value: '/workbench/{{ .name }}/j'
+              value: '/workbench/{{ .name }}/j/'
       destination:
         server: https://kubernetes.default.svc
         namespace: 'project-{{ .name }}'
