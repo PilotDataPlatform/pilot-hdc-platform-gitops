@@ -34,6 +34,7 @@ auth-service:
     KEYCLOAK_ID: hdc
     REDIS_HOST: redis-master.redis
     REDIS_PORT: "6379"
+    FREEIPA_URL: "ldap.dev.hdc.ebrains.eu"
     ENABLE_ACTIVE_DIRECTORY: "false"
     DOMAIN_NAME: "https://portal.dev.hdc.ebrains.eu"
     START_PATH: hdc
@@ -70,6 +71,16 @@ auth-service:
         secretKeyRef:
           name: auth-credentials
           key: keycloak-client-secret
+    - name: FREEIPA_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: auth-credentials
+          key: freeipa-username
+    - name: FREEIPA_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: auth-credentials
+          key: freeipa-password
 
   extraEnv:
     REDIS_DB: "0"
