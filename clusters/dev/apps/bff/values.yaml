@@ -42,7 +42,7 @@ base-chart-hdc:
     PROJECT_NAME: "HDC"
     KEYCLOAK_REALM: "hdc"
     KONG_PATH: "/pilot/"
-    RESOURCE_REQUEST_ADMIN: "admin"
+    RESOURCE_REQUEST_ADMIN: "testadmin"
     EMAIL_SUPPORT: "support@hdc.ebrains.eu"
     EMAIL_ADMIN: "admin@hdc.ebrains.eu"
     EMAIL_HELPDESK: "helpdesk@hdc.ebrains.eu"
