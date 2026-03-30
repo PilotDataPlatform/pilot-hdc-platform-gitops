@@ -1,28 +1,24 @@
 base-chart-hdc:
   image:
     repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/dataset
-    tag: "2.3.38"
+    tag: "2.3.40"
     tagPrefix: "dataset"
     pullPolicy: IfNotPresent
-
   initContainers:
     enabled: true
     image:
       tagPrefix: alembic
-
   fullnameOverride: dataset
   labels:
     app: dataset
     instance: dataset-service
   replicaCount: 1
-
   container:
     name: dataset
     ports:
       - name: http
         containerPort: 5081
         protocol: TCP
-
   service:
     type: ClusterIP
     ports:
@@ -30,14 +26,11 @@ base-chart-hdc:
         targetPort: 5081
         protocol: TCP
         name: http
-
   imagePullSecrets:
     - name: docker-registry-secret
-
   appConfig:
     env: dev
     config_center_enabled: false
-
   extraEnv:
     # Telemetry
     OPEN_TELEMETRY_ENABLED: "true"
@@ -92,7 +85,6 @@ base-chart-hdc:
     MAX_PREVIEW_SIZE: "500000"
     ESSENTIALS_NAME: "essential.schema.json"
     ESSENTIALS_TPL_NAME: "Essential"
-
   extraEnvYaml:
     - name: OPSDB_UTILITY_USERNAME
       valueFrom:
@@ -129,7 +121,6 @@ base-chart-hdc:
         secretKeyRef:
           name: dataset-credentials
           key: redis-password
-
   resources:
     requests:
       cpu: 10m
@@ -137,14 +128,12 @@ base-chart-hdc:
     limits:
       cpu: 500m
       memory: 500Mi
-
   readinessProbe:
     tcpSocket:
       port: 5081
     initialDelaySeconds: 5
     periodSeconds: 10
     failureThreshold: 3
-
   livenessProbe:
     httpGet:
       path: /v1/health
