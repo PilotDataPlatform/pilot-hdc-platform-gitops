@@ -18,6 +18,8 @@ This repo uses ArgoCD's app-of-apps pattern: a root Application (`root-app.yaml`
 | 3 | registry-secrets | ExternalSecrets for docker-registry-secret |
 | 3 | greenroom-storage | RWX PVC for upload/download (greenroom ns, nfs-client) |
 | 3 | core-storage | RWX PVC for upload/download (core ns, nfs-client) |
+| 3 | arc-controller | GitHub Actions Runner Controller (arc-systems ns) |
+| 4 | arc-runners-public | Self-hosted GH runners for PilotDataPlatform org (DinD, arc-runners ns) |
 | 4 | postgresql | Main DB (utility ns) |
 | 4 | keycloak-postgresql | Keycloak DB |
 | 5 | redis | |
@@ -192,6 +194,7 @@ vault kv put secret/minio \
 | `secret/bff-cli` | cli-secret, atlas-password, guacamole-jwt-public-key | bff-cli |
 | `secret/guacamole` | pg-password | guacamole-stack (PG admin + app user, per-project) |
 | `secret/docker-registry/ovh` | username, password | registry-secrets |
+| `secret/github-runner` | github_app_id, github_app_installation_id, github_app_private_key | arc-runners-public |
 
 To add or update a service password: `vault kv patch secret/postgresql <service>-user-password=<value>`
 
@@ -213,6 +216,8 @@ HDC splits workloads across namespaces by trust boundary and function:
 | `cert-manager` | TLS | cert-manager |
 | `external-secrets` | Secret sync | External Secrets Operator → Vault |
 | `nfs-provisioner` | Storage | NFS StorageClass for RWX PVCs |
+| `arc-systems` | CI runner controller | ARC (actions-runner-controller) |
+| `arc-runners` | CI runner pods | Self-hosted GitHub Actions runners (DinD) |
 | `project-{name}` | Per-project workbench | Guacamole (guacd + webapp + PG) — one ns per project |
 
 **High-level data flow**: Portal → BFF → Kong (API gateway) → HDC microservices → backing stores (PostgreSQL, Redis, Kafka, Elasticsearch, MinIO). Files land in the `greenroom` zone first, move to `core` after approval. Keycloak handles authentication, Vault stores all secrets synced via ESO.

@@ -49,6 +49,8 @@ declare -A CHART_TO_DIRS=(
   [xwiki]="xwiki"
   [guacamole-postgresql]="../workbench/guacamole-stack"
   [jupyterhub]="../workbench/jupyterhub"
+  [gha-runner-scale-set-controller]="arc-controller"
+  [gha-runner-scale-set]="arc-runners-public"
 )
 
 # When the versions.yaml key differs from the Chart.yaml dependency name

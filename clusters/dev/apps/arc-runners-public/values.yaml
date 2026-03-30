@@ -1,0 +1,29 @@
+gha-runner-scale-set:
+  githubConfigUrl: "https://github.com/PilotDataPlatform"
+  githubConfigSecret: "access-token-public"
+  runnerGroup: "HDC public repositories"
+  runnerScaleSetName: "hdc-dev-runners-public"
+  minRunners: 0
+  maxRunners: 10
+
+  controllerServiceAccount:
+    name: arc-controller
+    namespace: arc-systems
+
+  containerMode:
+    type: dind
+
+  template:
+    spec:
+      serviceAccountName: arc-runner
+      containers:
+        - name: runner
+          image: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-external/gh-runner:2.332.0-0
+          command: ["/home/runner/run.sh"]
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "2"
+              memory: "4Gi"

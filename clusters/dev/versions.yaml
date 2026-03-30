@@ -104,3 +104,5 @@ charts:
   xwiki: "0.3.0"
   guacamole-postgresql: "15.5.17"
   jupyterhub: "3.3.8"
+  gha-runner-scale-set-controller: "0.8.2"
+  gha-runner-scale-set: "0.8.2"
