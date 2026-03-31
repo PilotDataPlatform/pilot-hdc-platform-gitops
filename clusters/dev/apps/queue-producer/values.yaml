@@ -2,7 +2,7 @@ queue-service:
   image:
     repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/queue/producer
     pullPolicy: IfNotPresent
-    tag: "2.2.15"
+    tag: "producer-2.2.16"
   fullnameOverride: queue-producer
   replicaCount: 1
   container:
