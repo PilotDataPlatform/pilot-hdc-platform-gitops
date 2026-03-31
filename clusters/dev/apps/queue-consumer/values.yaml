@@ -2,7 +2,7 @@ queue-service:
   image:
     repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/queue/consumer
     pullPolicy: IfNotPresent
-    tag: "2.2.15" # prefixed tag — NOT from versions.yaml
+    tag: "consumer-2.2.16" # prefixed tag — NOT from versions.yaml
   fullnameOverride: queue-consumer
   replicaCount: 1
   container:
