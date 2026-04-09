@@ -1,0 +1,7 @@
+apiVersion: v2
+name: argo-cd
+version: 0.1.0
+dependencies:
+  - name: argo-cd
+    version: 9.1.7
+    repository: https://pilotdataplatform.github.io/helm-charts/

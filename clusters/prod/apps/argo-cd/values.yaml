@@ -1,0 +1,43 @@
+argo-cd:
+  global:
+    domain: argocd.hdc.ebrains.eu
+
+  redis:
+    enabled: true
+  redis-ha:
+    enabled: false
+
+  server:
+    service:
+      type: ClusterIP
+    ingress:
+      enabled: true
+      controller: generic
+      ingressClassName: nginx
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      hostname: argocd.hdc.ebrains.eu
+      path: /
+      pathType: Prefix
+      tls: true
+
+  configs:
+    cm:
+      admin.enabled: true
+      url: https://argocd.hdc.ebrains.eu
+      # Workaround for StatefulSet volumeClaimTemplates drift with ServerSideApply
+      # https://github.com/argoproj/argo-cd/issues/11143#issuecomment-3351076060
+      resource.customizations.ignoreDifferences.apps_StatefulSet: |
+        jqPathExpressions:
+          - .spec.volumeClaimTemplates[].apiVersion
+          - .spec.volumeClaimTemplates[].kind
+          - .spec.volumeClaimTemplates[].metadata.creationTimestamp
+      # ESO webhook injects defaults (conversionStrategy, decodingStrategy, metadataPolicy)
+      # causing perpetual diff against git manifests
+      resource.customizations.ignoreDifferences.external-secrets.io_ExternalSecret: |
+        jqPathExpressions:
+          - .spec.data[].remoteRef.conversionStrategy
+          - .spec.data[].remoteRef.decodingStrategy
+          - .spec.data[].remoteRef.metadataPolicy
