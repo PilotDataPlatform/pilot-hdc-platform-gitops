@@ -9,7 +9,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-APPS_DIR="$REPO_ROOT/clusters/dev/apps"
+ENV="${ENV:-dev}"
+APPS_DIR="$REPO_ROOT/clusters/$ENV/apps"
 OVH_INFRA="${OVH_INFRA:-$REPO_ROOT/../pilot-hdc-ovh-infra}"
 TF_DIR="$OVH_INFRA/terraform/keycloak"
 

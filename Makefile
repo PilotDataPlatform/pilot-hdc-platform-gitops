@@ -1,9 +1,25 @@
-APPS_DIR := clusters/dev/apps
-APPS := registry-secrets greenroom-storage core-storage nfs-provisioner postgresql keycloak-postgresql kong-postgresql redis kafka elasticsearch message-bus-greenroom keycloak auth metadata project dataops dataset approval kong bff minio mailhog notification portal queue-consumer queue-producer queue-socketio pipelinewatch upload-greenroom upload-core download-greenroom download-core metadata-event-handler search kg-integration bff-cli workspace xwiki
-REGISTRY_DIR := clusters/dev
-VERSIONS_FILE := clusters/dev/versions.yaml
-WORKBENCH_DIR := clusters/dev/workbench
-WORKBENCH_CHARTS := guacamole-stack superset jupyterhub
+ENV ?= dev
+$(if $(filter $(ENV),dev prod),,$(error ENV=$(ENV) is invalid. Valid: dev prod))
+CLUSTER_DIR := clusters/$(ENV)
+APPS_DIR := $(CLUSTER_DIR)/apps
+REGISTRY_DIR := $(CLUSTER_DIR)
+VERSIONS_FILE := $(CLUSTER_DIR)/versions.yaml
+WORKBENCH_DIR := $(CLUSTER_DIR)/workbench
+
+# Full curated app list — filtered to existing dirs so partial envs work
+_APPS := registry-secrets greenroom-storage core-storage nfs-provisioner postgresql keycloak-postgresql kong-postgresql redis kafka elasticsearch message-bus-greenroom keycloak auth metadata project dataops dataset approval kong bff minio mailhog notification portal queue-consumer queue-producer queue-socketio pipelinewatch upload-greenroom upload-core download-greenroom download-core metadata-event-handler search kg-integration bff-cli workspace xwiki
+APPS := $(strip $(foreach app,$(_APPS),$(if $(wildcard $(APPS_DIR)/$(app)),$(app))))
+
+_WORKBENCH_CHARTS := guacamole-stack superset jupyterhub
+WORKBENCH_CHARTS := $(strip $(foreach c,$(_WORKBENCH_CHARTS),$(if $(wildcard $(WORKBENCH_DIR)/$(c)),$(c))))
+
+ifeq ($(ENV),prod)
+  DOMAIN := hdc.ebrains.eu
+else
+  DOMAIN := dev.hdc.ebrains.eu
+endif
+
+export ENV
 
 .PHONY: helm-deps helm-deps-workbench helm-test-eso helm-test-image helm-test-versions helm-test-envdup helm-test-pullsecrets helm-test-envvars-rendered helm-test-regsecret-coverage helm-test-workbench sync-versions sync-rsa-key test clean switch-registry which-registry
 
@@ -75,9 +91,11 @@ sync-rsa-key:
 # Verify image tags rendered by helm template match versions.yaml
 helm-test-versions: helm-deps
 	@echo "Testing image tags from versions.yaml..."
-	@failed=0; \
+	@if [ ! -f $(VERSIONS_FILE) ]; then echo "⊘ No versions.yaml (skipped)"; exit 0; fi; \
+	failed=0; \
 	check_tag() { \
 		app=$$1; values_key=$$2; dir=$$3; \
+		if [ ! -d $(APPS_DIR)/$$dir ]; then echo "⊘ $$app: not present (skipped)"; return 0; fi; \
 		expected=$$(yq ".\"$$values_key\".image.tag" $(VERSIONS_FILE)); \
 		rendered=$$(helm template test $(APPS_DIR)/$$dir \
 			-f $(REGISTRY_DIR)/registry.yaml \
@@ -116,23 +134,23 @@ helm-test-versions: helm-deps
 # Detect duplicate env var names that ServerSideApply would reject
 helm-test-envdup: helm-deps
 	@echo "Testing for duplicate env vars..."
-	@bash scripts/check-duplicate-env.sh $(APPS)
+	@if [ -n "$(APPS)" ]; then bash scripts/check-duplicate-env.sh $(APPS); else echo "⊘ No apps to test"; fi
 
 # Ensure every pod spec has imagePullSecrets for private registry access
 helm-test-pullsecrets: helm-deps
 	@echo "Testing imagePullSecrets on all pod specs..."
-	@bash scripts/check-pull-secrets.sh $(APPS)
+	@if [ -n "$(APPS)" ]; then bash scripts/check-pull-secrets.sh $(APPS); else echo "⊘ No apps to test"; fi
 
 # Verify env vars defined in values.yaml are actually rendered in helm template
 # Catches chart bugs where extraEnvVars aren't picked up (e.g., Kong migration job)
 helm-test-envvars-rendered: helm-deps
 	@echo "Testing env vars defined in values.yaml are rendered..."
-	@bash scripts/check-envvars-rendered.sh $(APPS)
+	@if [ -n "$(APPS)" ]; then bash scripts/check-envvars-rendered.sh $(APPS); else echo "⊘ No apps to test"; fi
 
 # Ensure every namespace that uses docker-registry-secret is covered by registry-secrets
 helm-test-regsecret-coverage: helm-deps
 	@echo "Testing registry-secret namespace coverage..."
-	@bash scripts/check-registry-secret-coverage.sh $(APPS)
+	@if [ -n "$(APPS)" ]; then bash scripts/check-registry-secret-coverage.sh $(APPS); else echo "⊘ No apps to test"; fi
 
 # Test workbench charts render correctly
 helm-test-workbench: helm-deps-workbench
@@ -144,7 +162,7 @@ helm-test-workbench: helm-deps-workbench
 			-f $(REGISTRY_DIR)/registry.yaml \
 			-f $(WORKBENCH_DIR)/$$chart/values.yaml \
 			--set projectName=testproject \
-			--set domain=dev.hdc.ebrains.eu \
+			--set domain=$(DOMAIN) \
 			--skip-tests 2>&1); \
 		if [ $$? -ne 0 ]; then \
 			echo "✗ $$chart: helm template failed"; \

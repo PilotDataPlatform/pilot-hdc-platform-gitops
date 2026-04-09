@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Syncs chart dependency versions from clusters/dev/versions.yaml into each app's Chart.yaml
+# Syncs chart dependency versions from versions.yaml into each app's Chart.yaml
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-VERSIONS_FILE="$REPO_ROOT/clusters/dev/versions.yaml"
-APPS_DIR="$REPO_ROOT/clusters/dev/apps"
+ENV="${ENV:-dev}"
+VERSIONS_FILE="$REPO_ROOT/clusters/$ENV/versions.yaml"
+APPS_DIR="$REPO_ROOT/clusters/$ENV/apps"
 
 if ! command -v yq &>/dev/null; then
   echo "ERROR: yq is required. Install: https://github.com/mikefarah/yq" >&2

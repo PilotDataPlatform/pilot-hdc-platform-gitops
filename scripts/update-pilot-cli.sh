@@ -1,6 +1,6 @@
 #!/bin/bash
 # Deploy pilotcli binary to shared-tools NFS PVC in all project namespaces.
-# Discovers projects dynamically from clusters/dev/workbench/projects/*.yaml.
+# Discovers projects dynamically from the active environment's workbench/projects/*.yaml.
 # Run from repo root.
 
 set -euo pipefail
@@ -10,7 +10,8 @@ PILOTCLI_PATH="/tmp/pilotcli"
 COPY_DESTINATION="/opt/shared"
 OWNER="PilotDataPlatform"
 REPO="cli"
-PROJECTS_DIR="clusters/dev/workbench/projects"
+ENV="${ENV:-dev}"
+PROJECTS_DIR="clusters/$ENV/workbench/projects"
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"

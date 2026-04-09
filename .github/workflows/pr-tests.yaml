@@ -10,25 +10,31 @@ on:
 
 jobs:
   sync-versions-check:
-    name: Chart versions in sync
+    name: Chart versions in sync (${{ matrix.env }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        env: [dev]  # TODO: add prod once clusters/prod/ has apps
     steps:
       - uses: actions/checkout@v4
 
       - uses: mikefarah/yq@v4
 
-      - run: make sync-versions
+      - run: make ENV=${{ matrix.env }} sync-versions
 
       - name: Fail if Chart.yaml files drifted
         run: |
-          if ! git diff --exit-code -- 'clusters/dev/apps/*/Chart.yaml'; then
-            echo "::error::Chart.yaml versions out of sync with versions.yaml. Run 'make sync-versions' and commit."
+          if ! git diff --exit-code -- 'clusters/${{ matrix.env }}/apps/*/Chart.yaml'; then
+            echo "::error::Chart.yaml versions out of sync with versions.yaml. Run 'make ENV=${{ matrix.env }} sync-versions' and commit."
             exit 1
           fi
 
   helm-tests:
-    name: Helm template tests
+    name: Helm template tests (${{ matrix.env }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        env: [dev]  # TODO: add prod once clusters/prod/ has apps
     steps:
       - uses: actions/checkout@v4
 
@@ -41,13 +47,13 @@ jobs:
         with:
           path: |
             ~/.cache/helm
-            clusters/dev/apps/*/charts
-          key: helm-deps-${{ hashFiles('clusters/dev/apps/*/Chart.yaml', 'clusters/dev/apps/*/Chart.lock') }}
-          restore-keys: helm-deps-
+            clusters/${{ matrix.env }}/apps/*/charts
+          key: helm-deps-${{ matrix.env }}-${{ hashFiles(format('clusters/{0}/apps/*/Chart.yaml', matrix.env), format('clusters/{0}/apps/*/Chart.lock', matrix.env)) }}
+          restore-keys: helm-deps-${{ matrix.env }}-
 
       - name: Add Helm repos
         run: |
           helm repo add pilot https://pilotdataplatform.github.io/helm-charts/
           helm repo add nfs-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
 
-      - run: make test
+      - run: make ENV=${{ matrix.env }} test

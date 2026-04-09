@@ -4,9 +4,10 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-APPS_DIR="$REPO_ROOT/clusters/dev/apps"
-REGISTRY_DIR="$REPO_ROOT/clusters/dev"
-VERSIONS_FILE="$REPO_ROOT/clusters/dev/versions.yaml"
+ENV="${ENV:-dev}"
+APPS_DIR="$REPO_ROOT/clusters/$ENV/apps"
+REGISTRY_DIR="$REPO_ROOT/clusters/$ENV"
+VERSIONS_FILE="$REPO_ROOT/clusters/$ENV/versions.yaml"
 
 if [[ $# -eq 0 ]]; then
   echo "Usage: $0 app1 [app2 ...]" >&2
