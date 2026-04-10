@@ -1,0 +1,7 @@
+apiVersion: v2
+name: kafka
+version: 0.1.0
+dependencies:
+  - name: kafka
+    version: "20.0.3"
+    repository: https://pilotdataplatform.github.io/helm-charts/

@@ -155,32 +155,19 @@ vault write auth/kubernetes/role/external-secrets \
 ### Verify Integration
 
 ```bash
-# Create test secret
 vault kv put secret/test foo=bar
+vault kv get secret/test
 
 # Check ESO synced it (ClusterSecretStore "vault" is pre-configured)
 kubectl get externalsecret -A
+
+# Clean up
+vault kv delete secret/test
 ```
 
 ## Required Vault Secrets
 
-These secrets must exist in Vault before the corresponding apps can sync.
-
-### MinIO (`secret/minio`)
-
-```bash
-# Generate 256-bit encryption key
-ENCRYPTION_KEY=$(openssl rand -base64 32)
-
-vault kv put secret/minio \
-  access_key="minio-admin" \
-  secret_key="$(openssl rand -hex 16)" \
-  kms_secret_key="minio-encryption-key:${ENCRYPTION_KEY}"
-```
-
-**Important**: Back up `kms_secret_key` - losing it means losing access to encrypted data.
-
-### Other Secrets
+These secrets must exist in Vault before the corresponding apps can sync. See [`docs/vault-secrets.md`](docs/vault-secrets.md) for ready-to-run provisioning commands.
 
 | Path | Keys | Used By |
 |------|------|---------|
@@ -198,16 +185,6 @@ vault kv put secret/minio \
 | `secret/guacamole` | pg-password | guacamole-stack (PG admin + app user, per-project) |
 | `secret/docker-registry/ovh` | username, password | registry-secrets |
 | `secret/github-runner` | github_app_id, github_app_installation_id, github_app_private_key | arc-runners-public |
-
-### Docker Registry (`secret/docker-registry/ovh`)
-
-```bash
-vault kv put secret/docker-registry/ovh \
-  username='<registry-robot-account>' \
-  password='<registry-robot-token>'
-```
-
-To add or update a service password: `vault kv patch secret/postgresql <service>-user-password=<value>`
 
 ## Platform Architecture (WIP)
 

@@ -1,0 +1,112 @@
+kafka:
+  global:
+    imageRegistry: n47w5524.c1.de1.container-registry.ovh.net
+    imagePullSecrets:
+      - docker-registry-secret
+
+  image:
+    repository: hdc-services-external/bitnami/kafka
+
+  heapOpts: -Xms256M -Xmx256M
+  deleteTopicEnable: true
+
+  replicaCount: 1
+  defaultReplicationFactor: 1
+  offsetsTopicReplicationFactor: 1
+  transactionStateLogReplicationFactor: 1
+  transactionStateLogMinIsr: 1
+
+  persistence:
+    enabled: true
+    size: 2Gi
+
+  zookeeper:
+    image:
+      repository: hdc-services-external/bitnami/zookeeper
+    replicaCount: 1
+    heapSize: 256
+    persistence:
+      enabled: true
+      size: 1Gi
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+  service:
+    type: ClusterIP
+
+  extraDeploy:
+    - |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: {{ include "kafka.name" . }}-connect
+        labels: {{- include "common.labels.standard" . | nindent 4 }}
+          app.kubernetes.io/component: connector
+      spec:
+        replicas: 1
+        selector:
+          matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
+            app.kubernetes.io/component: connector
+        template:
+          metadata:
+            labels: {{- include "common.labels.standard" . | nindent 8 }}
+              app.kubernetes.io/component: connector
+          spec:
+            imagePullSecrets:
+              - name: docker-registry-secret
+            # initContainers: plugins-downloader removed — add back when CDC/ES connectors needed
+            containers:
+              - name: connect
+                image: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-external/debezium/connect:1.1
+                imagePullPolicy: IfNotPresent
+                ports:
+                  - name: connector
+                    containerPort: 8083
+                volumeMounts:
+                  - name: configuration
+                    mountPath: /bitnami/kafka/config
+                  - name: kafka-connect-plugins-dir
+                    mountPath: /tmp
+                env:
+                  - name: BOOTSTRAP_SERVERS
+                    value: "kafka:9092"
+                  - name: GROUP_ID
+                    value: "sde_group"
+                  - name: CONFIG_STORAGE_TOPIC
+                    value: "sde_storage_topic"
+                  - name: OFFSET_STORAGE_TOPIC
+                    value: "sde_offset_topic"
+                  - name: KAFKA_CONNECT_PLUGINS_DIR
+                    value: "/kafka/connect,/tmp"
+            volumes:
+              - name: configuration
+                configMap:
+                  name: {{ include "kafka.name" . }}-connect
+              - name: kafka-connect-plugins-dir
+                emptyDir: {}
+    - |
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: {{ include "kafka.name" . }}-connect
+        labels: {{- include "common.labels.standard" . | nindent 4 }}
+          app.kubernetes.io/component: connector
+      data:
+        connect-standalone.properties: |-
+          bootstrap.servers = {{ include "kafka.name" . }}-0.{{ include "kafka.name" . }}-headless.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}:{{ .Values.service.port }}
+    - |
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: {{ include "kafka.name" . }}-connect
+        labels: {{- include "common.labels.standard" . | nindent 4 }}
+          app.kubernetes.io/component: connector
+      spec:
+        ports:
+          - protocol: TCP
+            port: 8083
+            targetPort: connector
+        selector: {{- include "common.labels.matchLabels" . | nindent 4 }}
+          app.kubernetes.io/component: connector

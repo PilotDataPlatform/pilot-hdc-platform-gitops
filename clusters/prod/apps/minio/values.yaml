@@ -1,0 +1,79 @@
+minio:
+  fullnameOverride: minio
+
+  global:
+    imagePullSecrets:
+      - docker-registry-secret
+
+  image:
+    repository: hdc-services-external/bitnami/minio
+    # tag from versions.yaml (2022.12.12-debian-11-r9)
+
+  mode: standalone
+
+  auth:
+    existingSecret: minio-credentials
+    # Chart expects keys: root-user, root-password
+
+  persistence:
+    enabled: true
+    storageClass: "csi-cinder-high-speed"
+    accessMode: ReadWriteOnce
+    size: 5Gi
+
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+
+  # Console ingress - not needed, internal access only
+  ingress:
+    enabled: false
+
+  # S3 API ingress - public endpoint for S3_PUBLIC access
+  apiIngress:
+    enabled: true
+    ingressClassName: nginx
+    hostname: object.hdc.ebrains.eu
+    path: /
+    pathType: Prefix
+    servicePort: minio-api
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/proxy-body-size: 20m
+      nginx.ingress.kubernetes.io/proxy-buffer-size: 512k
+      nginx.ingress.kubernetes.io/proxy-buffering: "on"
+      nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
+      nginx.ingress.kubernetes.io/proxy-connect-timeout: 180s
+      nginx.ingress.kubernetes.io/proxy-max-temp-file-size: "0"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: 180s
+      nginx.ingress.kubernetes.io/proxy-send-timeout: 180s
+    tls: true
+
+  service:
+    type: ClusterIP
+
+  # Bucket provisioning (runs as post-install/post-upgrade Job)
+  provisioning:
+    enabled: true
+    buckets:
+      - name: public-resources
+      - name: project-logos
+    # Anonymous read-only access via extraCommands because chart's native
+    # provisioning.policies only supports IAM policies (mc admin policy add) —
+    # no Principal field. Anonymous access needs "Principal":{"AWS":["*"]}
+    # which requires mc anonymous set-json instead.
+    # Note: chart sets mc alias as "provisioning" (not "local")
+    extraCommands:
+      - 'for BUCKET in public-resources project-logos; do printf ''{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::%s/*"]}]}'' "$BUCKET" > /tmp/anon-policy.json && mc anonymous set-json /tmp/anon-policy.json provisioning/$BUCKET; done'
+
+  # Encryption via built-in master key (no KES needed)
+  extraEnvVars:
+    - name: MINIO_KMS_SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: minio-credentials
+          key: kms-secret-key

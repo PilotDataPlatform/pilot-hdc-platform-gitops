@@ -1,0 +1,7 @@
+apiVersion: v2
+name: keycloak-postgresql
+version: 0.1.0
+dependencies:
+  - name: postgresql
+    version: "15.5.17"
+    repository: https://pilotdataplatform.github.io/helm-charts/

@@ -1,0 +1,28 @@
+redis:
+  fullnameOverride: redis
+
+  global:
+    imagePullSecrets:
+      - docker-registry-secret
+
+  image:
+    repository: hdc-services-external/bitnami/redis
+
+  architecture: standalone
+
+  auth:
+    existingSecret: redis-credentials
+    existingSecretPasswordKey: password
+
+  master:
+    persistence:
+      size: 1Gi
+      storageClass: "csi-cinder-high-speed"
+
+    resources:
+      limits:
+        memory: 256Mi
+        cpu: 500m
+      requests:
+        memory: 128Mi
+        cpu: 100m

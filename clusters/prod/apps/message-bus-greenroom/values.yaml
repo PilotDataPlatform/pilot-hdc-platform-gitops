@@ -1,0 +1,32 @@
+rabbitmq:
+  fullnameOverride: message-bus-greenroom
+
+  global:
+    imagePullSecrets:
+      - docker-registry-secret
+
+  image:
+    repository: hdc-services-external/bitnami/rabbitmq
+    tag: 3.11.6-debian-11-r0
+
+  replicaCount: 1
+
+  auth:
+    username: greenroom
+    existingPasswordSecret: message-bus-greenroom-credentials
+
+  persistence:
+    enabled: true
+    storageClass: "csi-cinder-high-speed"
+    size: 1Gi
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  service:
+    type: ClusterIP
