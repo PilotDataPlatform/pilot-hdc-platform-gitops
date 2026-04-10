@@ -1,0 +1,3 @@
+global:
+  imageRegistry: docker-registry.ebrains.eu
+registryVaultPath: secret/data/docker-registry/ebrains

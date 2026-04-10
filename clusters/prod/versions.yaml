@@ -1,0 +1,108 @@
+# Centralized version definitions for all apps
+# Image tags are consumed as Helm valueFiles
+# Chart versions are synced to Chart.yaml via: make sync-versions
+
+# -- HDC service image tags (auto-bumped by CI) --
+auth-service:
+  image:
+    tag: "2.2.38"
+metadata-service:
+  image:
+    tag: "2.2.13"
+project-service:
+  image:
+    tag: "2.3.9"
+dataops-service:
+  image:
+    tag: "2.5.8"
+notification-service:
+  image:
+    tag: "2.2.10"
+pipelinewatch-service:
+  image:
+    tag: "pipelinewatch-2.2.7"
+upload-service:
+  image:
+    tag: "upload-2.2.19"
+download-service:
+  image:
+    tag: "download-2.2.21"
+approval-service:
+  image:
+    tag: "2.2.9"
+metadata-event-handler:
+  image:
+    tag: "metadata_event_handler-1.0.8"
+search-service:
+  image:
+    tag: "2.2.10"
+bff-cli-service:
+  image:
+    tag: "bff-cli-2.2.15"
+workspace-service:
+  image:
+    tag: "2.2.7"
+portal:
+  image:
+    tag: "1.7.5-hdc-ovh-prod"
+# BFF and dataset use base-chart-hdc — tags managed in their values.yaml by CI (update_gitops_versions.yml)
+
+# -- Infrastructure image tags (manually managed) --
+postgresql:
+  image:
+    tag: "16.3.0-932ab18-pgcron"
+keycloak:
+  image:
+    tag: "20.0.5-debian-11-r4"
+# Note: keycloak init container alpine:3.21 is hardcoded in keycloak/values.yaml
+
+kong:
+  image:
+    tag: "latest"
+xwiki:
+  image:
+    tag: "16.6.0-postgres-tomcat"
+minio:
+  image:
+    tag: "2022.12.12-debian-11-r9"
+# -- Chart dependency versions --
+# Synced to Chart.yaml via: make sync-versions
+charts:
+  argo-cd: "9.1.7"
+  auth-service: "1.0.9"
+  base-chart-hdc: "1.0.1"
+  metadata-service: "1.0.0"
+  project-service: "0.2.1"
+  dataops-service: "0.2.1"
+  cert-manager-jetstack: "v1.19.2"
+  external-secrets: "1.2.1"
+  ingress-nginx: "4.14.1"
+  keycloak: "13.2.0"
+  postgresql: "15.5.17"
+  rabbitmq: "10.1.12"
+  redis: "16.11.2"
+  kafka: "20.0.3"
+  elasticsearch: "17.9.29"
+  kong: "9.1.8"
+  mailhog: "5.0.7"
+  notification-service: "0.3.2"
+  approval-service: "0.3.1"
+  queue-service: "0.3.0" # consumer + producer
+  queue-service-socketio: "0.4.1" # socketio only (same chart, different version)
+  minio: "11.7.13"
+  portal: "2.1.2"
+  vault: "0.31.0"
+  nfs-subdir-external-provisioner: "4.0.18"
+  pipelinewatch-service: "0.4.2"
+  upload-service: "0.3.1"
+  download-service: "1.0.6"
+  metadata-event-handler: "0.1.1"
+  search-service: "0.2.2"
+  base-chart: "0.1.0"
+  bff-cli-service: "0.1.0"
+  workspace-service: "0.2.0"
+  xwiki: "0.3.0"
+  guacamole-postgresql: "15.5.17"
+  jupyterhub: "3.3.8"
+  gha-runner-scale-set-controller: "0.8.2"
+  gha-runner-scale-set: "0.8.2"

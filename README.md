@@ -3,7 +3,9 @@ GitOps repository that contains all the related configuration to manage the Pilo
 
 ## App-of-Apps Pattern
 
-This repo uses ArgoCD's app-of-apps pattern: a root Application (`root-app.yaml`) deploys all child Applications, each defined under `clusters/dev/apps/<name>/`.
+This repo uses ArgoCD's app-of-apps pattern: a root Application (`root-app.yaml`) deploys all child Applications, each defined under `clusters/<env>/apps/<name>/`.
+
+> **Environments:** Replace `<env>` with `dev` or `prod` throughout. Domains: dev -> `dev.hdc.ebrains.eu`, prod -> `hdc.ebrains.eu`.
 
 ### Sync-Wave Order
 
@@ -18,15 +20,15 @@ This repo uses ArgoCD's app-of-apps pattern: a root Application (`root-app.yaml`
 | 3 | registry-secrets | ExternalSecrets for docker-registry-secret |
 | 3 | greenroom-storage | RWX PVC for upload/download (greenroom ns, nfs-client) |
 | 3 | core-storage | RWX PVC for upload/download (core ns, nfs-client) |
-| 3 | arc-controller | GitHub Actions Runner Controller (arc-systems ns) |
-| 4 | arc-runners-public | Self-hosted GH runners for PilotDataPlatform org (DinD, arc-runners ns) |
+| 3 | arc-controller | GitHub Actions Runner Controller (arc-systems ns, dev only) |
+| 4 | arc-runners-public | Self-hosted GH runners for PilotDataPlatform org (DinD, arc-runners ns, dev only) |
 | 4 | postgresql | Main DB (utility ns) |
 | 4 | keycloak-postgresql | Keycloak DB |
 | 5 | redis | |
 | 5 | kafka | Broker + Zookeeper + Connect |
 | 5 | elasticsearch | ES 7.17.3 (utility ns) |
-| 5 | mailhog | SMTP sink for dev (no auth, no ingress) |
-| 5 | minio | Object storage, S3 API ingress at `object.dev.hdc.ebrains.eu` |
+| 5 | mailhog | SMTP sink (dev only, no auth, no ingress) |
+| 5 | minio | Object storage, S3 API ingress at `object.<domain>` |
 | 5 | message-bus-greenroom | RabbitMQ (greenroom ns) |
 | 6 | keycloak | |
 | 7 | auth | |
@@ -34,7 +36,7 @@ This repo uses ArgoCD's app-of-apps pattern: a root Application (`root-app.yaml`
 | 8 | project | |
 | 8 | dataset | Dataset management (S3, metadata) |
 | 8 | dataops | Data operations (lineage, file ops) |
-| 8 | notification | Email notifications (uses MailHog SMTP) |
+| 8 | notification | Email notifications (dev: MailHog SMTP; prod: real SMTP) |
 | 8 | approval | Copy request workflows |
 | 8 | kong-postgresql | Kong DB (split from kong for PreSync hook) |
 | 8 | queue-consumer | Queue consumer (greenroom ns) |
@@ -59,7 +61,7 @@ This repo uses ArgoCD's app-of-apps pattern: a root Application (`root-app.yaml`
 
 ### Workbench (Per-Project ApplicationSets)
 
-Workbench services are deployed per project namespace (`project-{name}`) using ArgoCD ApplicationSets with a git file generator. Each project is defined in `clusters/dev/workbench/projects/{name}.yaml`:
+Workbench services are deployed per project namespace (`project-{name}`) using ArgoCD ApplicationSets with a git file generator. Each project is defined in `clusters/<env>/workbench/projects/{name}.yaml`:
 
 ```yaml
 name: myproject
@@ -69,13 +71,13 @@ Adding a project file triggers ApplicationSets to create per-project instances o
 
 | Service | Chart | Components |
 |---------|-------|------------|
-| Guacamole | `clusters/dev/workbench/guacamole-stack/` | guacd + guacamole + PostgreSQL (md5 auth) |
+| Guacamole | `clusters/<env>/workbench/guacamole-stack/` | guacd + guacamole + PostgreSQL (md5 auth) |
 
-The `projects/` directory is shared across all workbench ApplicationSets — future services (Superset, JupyterHub) will read from the same catalog.
+The `projects/` directory is shared across all workbench ApplicationSets within an environment — future services (Superset, JupyterHub) will read from the same catalog.
 
 #### Adding a new project
 
-1. Create `clusters/dev/workbench/projects/<name>.yaml` with `name: <name>`
+1. Create `clusters/<env>/workbench/projects/<name>.yaml` with `name: <name>`
 2. Ensure prerequisites exist:
    - Vault secret: `vault kv put secret/guacamole pg-password=$(openssl rand -hex 24)`
    - Keycloak client: `guacamole-<name>` (managed in Terraform)
@@ -106,8 +108,9 @@ After ArgoCD deploys Vault, these manual steps are required once per cluster.
 # Initialize - outputs 5 unseal keys + root token
 kubectl exec -it vault-0 -n vault -- vault operator init
 
-# Store keys securely (dev cluster uses gopass), e.g:
-# gopass ebrains-dev/hdc/ovh/vault-unseal-keys
+# Store keys securely in gopass:
+#   dev:  gopass ebrains-dev/hdc/ovh/vault-unseal-keys
+#   prod: gopass ebrains/hdc/ovh/vault-unseal-keys
 
 # Unseal (repeat 3x with different keys)
 kubectl exec -it vault-0 -n vault -- vault operator unseal
@@ -196,6 +199,14 @@ vault kv put secret/minio \
 | `secret/docker-registry/ovh` | username, password | registry-secrets |
 | `secret/github-runner` | github_app_id, github_app_installation_id, github_app_private_key | arc-runners-public |
 
+### Docker Registry (`secret/docker-registry/ovh`)
+
+```bash
+vault kv put secret/docker-registry/ovh \
+  username='<registry-robot-account>' \
+  password='<registry-robot-token>'
+```
+
 To add or update a service password: `vault kv patch secret/postgresql <service>-user-password=<value>`
 
 ## Platform Architecture (WIP)
@@ -234,17 +245,17 @@ HDC splits workloads across namespaces by trust boundary and function:
 
 ### Version Management
 
-All image tags and chart dependency versions are centralized in [`clusters/dev/versions.yaml`](clusters/dev/versions.yaml).
+All image tags and chart dependency versions are centralized in `clusters/<env>/versions.yaml`.
 
 ```bash
 # 1. Edit versions.yaml (image tag or chart version)
-vim clusters/dev/versions.yaml
+vim clusters/<env>/versions.yaml
 
 # 2. For chart version changes, propagate to Chart.yaml files
-make sync-versions
+make ENV=<env> sync-versions
 
 # 3. Validate
-make test
+make ENV=<env> test
 
 # 4. Commit both versions.yaml and any updated Chart.yaml files
 ```
@@ -253,19 +264,19 @@ Image tags are consumed as a Helm valueFile — ArgoCD deep-merges `registry.yam
 
 ### Registry Switching
 
-The repo supports multiple container registries (OVH, EBRAINS). The active registry is set in `clusters/dev/registry.yaml`.
+The repo supports multiple container registries (OVH, EBRAINS). The active registry is set in `clusters/<env>/registry.yaml`.
 
 ```bash
-make which-registry              # show current registry
-make switch-registry TO=ovh      # switch to OVH registry
-make switch-registry TO=ebrains  # switch to EBRAINS registry
+make ENV=<env> which-registry              # show current registry
+make ENV=<env> switch-registry TO=ovh      # switch to OVH registry
+make ENV=<env> switch-registry TO=ebrains  # switch to EBRAINS registry
 ```
 
 This updates `registry.yaml` and rewrites hardcoded registry URLs in app `values.yaml` files.
 
 ### Validation
 
-Run `make test` before committing. It runs all checks:
+Run `make ENV=<env> test` before committing. It runs all checks:
 
 | Test | What it catches |
 |------|----------------|
