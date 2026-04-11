@@ -31,7 +31,8 @@ vault kv patch secret/postgresql <service>-user-password=$(openssl rand -hex 24)
 vault kv put secret/keycloak \
   admin-password=$(openssl rand -hex 24) \
   postgres-password=$(openssl rand -hex 24) \
-  keycloak-user-password=$(openssl rand -hex 24)
+  keycloak-user-password=$(openssl rand -hex 24) \
+  github-token='<github-pat-with-packages-read-scope>'
 ```
 
 ## Redis (`secret/redis`)
@@ -76,7 +77,8 @@ vault kv put secret/docker-registry/ovh \
 
 ```bash
 vault kv put secret/auth \
-  keycloak-client-secret='<client-secret-from-keycloak>'
+  keycloak-client-secret='<client-secret-from-keycloak>' \
+  freeipa-password='<freeipa-service-account-password>'
 ```
 
 ## Kong (`secret/kong`)
