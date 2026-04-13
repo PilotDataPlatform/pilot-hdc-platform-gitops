@@ -105,6 +105,17 @@ vault kv put secret/download \
   download-key=$(openssl rand -hex 32)
 ```
 
+## XWiki (`secret/xwiki`)
+
+```bash
+vault kv put secret/xwiki \
+  postgresql-password=$(openssl rand -hex 24) \
+  xwiki-cfg='<xwiki.cfg-file-contents>' \
+  xwiki-properties='<xwiki.properties-file-contents>'
+```
+
+The `xwiki-cfg` and `xwiki-properties` values are full file contents mounted into the container. Copy from the running dev instance or from backup.
+
 ## KG Integration (`secret/kg-integration`)
 
 ```bash

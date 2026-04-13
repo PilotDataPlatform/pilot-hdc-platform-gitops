@@ -1,0 +1,7 @@
+apiVersion: v2
+name: pipelinewatch
+version: 0.1.0
+dependencies:
+  - name: pipelinewatch-service
+    version: "0.4.2"
+    repository: https://pilotdataplatform.github.io/helm-charts/

@@ -1,0 +1,57 @@
+metadata-event-handler:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/metadata_event_handler
+    pullPolicy: IfNotPresent
+
+  fullnameOverride: metadata-event-handler
+  replicaCount: 1
+
+  container:
+    port: 5069
+
+  service:
+    type: ClusterIP
+    port: 5069
+    targetPort: 5069
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  # appConfig: only KAFKA_SERVICE and ELASTICSEARCH_SERVICE are rendered by the chart template
+  appConfig:
+    KAFKA_SERVICE: "kafka.utility:9092"
+    ELASTICSEARCH_SERVICE: "http://elasticsearch-master.utility:9200"
+
+  extraEnv:
+    KAFKA_TOPICS: '["metadata.items", "metadata.items.activity", "dataset.activity"]'
+    METADATA_SERVICE: "http://metadata.utility:5066"
+    PROJECT_SERVICE: "http://project.utility:5064"
+    APP_NAME: "metadata-event-handler"
+    VERSION: "1.0.0"
+    HOST: "0.0.0.0"
+    PORT: "5069"
+    WORKERS: "1"
+
+  resources:
+    limits:
+      cpu: "1"
+      memory: 100Mi
+    requests:
+      cpu: 10m
+      memory: 10Mi
+
+  livenessProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /v1/health/
+      port: 5069
+      scheme: HTTP
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 3
+
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 33%
+    type: RollingUpdate

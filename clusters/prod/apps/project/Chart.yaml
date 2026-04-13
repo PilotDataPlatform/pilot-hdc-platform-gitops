@@ -1,0 +1,7 @@
+apiVersion: v2
+name: project
+version: 0.1.0
+dependencies:
+  - name: project-service
+    version: "0.2.1"
+    repository: https://pilotdataplatform.github.io/helm-charts/

@@ -1,0 +1,76 @@
+kong:
+  migration:
+    annotations:
+      helm.sh/hook: post-install, pre-upgrade
+      helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    # Chart bug: postgresql.external.database not mapped to KONG_PG_DATABASE
+    extraEnvVars:
+      - name: KONG_PG_DATABASE
+        value: "kong"
+
+  global:
+    imagePullSecrets:
+      - docker-registry-secret
+
+  image:
+    repository: hdc-services-external/kong-with-oidc
+    pullPolicy: IfNotPresent
+    debug: false
+
+  database: postgresql
+  replicaCount: 1
+
+  # Disable bundled PostgreSQL — using external kong-postgresql app (wave 8)
+  postgresql:
+    enabled: false
+    external:
+      host: kong-postgresql
+      port: 5432
+      user: kong
+      database: kong
+      existingSecret: kong-postgresql-credentials
+      existingSecretPasswordKey: password
+
+  ingress:
+    enabled: true
+    hostname: api.hdc.ebrains.eu
+    path: /
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/affinity: cookie
+      nginx.ingress.kubernetes.io/proxy-body-size: 20m
+      nginx.ingress.kubernetes.io/proxy-buffer-size: 512k
+      nginx.ingress.kubernetes.io/proxy-buffering: "on"
+      nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
+      nginx.ingress.kubernetes.io/proxy-connect-timeout: 180s
+      nginx.ingress.kubernetes.io/proxy-max-temp-file-size: "0"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: 180s
+      nginx.ingress.kubernetes.io/proxy-send-timeout: 180s
+    tls: true
+
+  ingressController:
+    enabled: false
+
+  kong:
+    extraEnvVars:
+      - name: KONG_LOG_LEVEL
+        value: "info"
+      - name: KONG_PLUGINS
+        value: "bundled,oidc"
+      - name: KONG_LUA_SSL_TRUSTED_CERTIFICATE
+        value: "/etc/ssl/certs/ca-certificates.crt"
+      # Chart bug: postgresql.external.database not mapped to KONG_PG_DATABASE
+      - name: KONG_PG_DATABASE
+        value: "kong"
+
+  service:
+    exposeAdmin: true
+
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"

@@ -1,0 +1,7 @@
+apiVersion: v2
+name: upload-greenroom
+version: 0.1.0
+dependencies:
+  - name: upload-service
+    version: "0.3.1"
+    repository: https://pilotdataplatform.github.io/helm-charts/

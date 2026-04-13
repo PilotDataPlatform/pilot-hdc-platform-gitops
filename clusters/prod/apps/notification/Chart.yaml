@@ -1,0 +1,7 @@
+apiVersion: v2
+name: notification
+version: 0.1.0
+dependencies:
+  - name: notification-service
+    version: "0.3.2"
+    repository: https://pilotdataplatform.github.io/helm-charts/

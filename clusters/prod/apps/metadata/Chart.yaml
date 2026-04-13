@@ -1,0 +1,7 @@
+apiVersion: v2
+name: metadata
+version: 0.1.0
+dependencies:
+  - name: metadata-service
+    version: "1.0.0"
+    repository: https://pilotdataplatform.github.io/helm-charts/

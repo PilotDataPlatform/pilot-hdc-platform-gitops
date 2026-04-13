@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: https://github.com/PilotDataPlatform/pilot-hdc-platform-gitops.git
     targetRevision: main
-    path: clusters/dev/apps/kong-postgresql
+    path: clusters/prod/apps/kong-postgresql
     helm:
       valueFiles:
         - ../../registry.yaml
