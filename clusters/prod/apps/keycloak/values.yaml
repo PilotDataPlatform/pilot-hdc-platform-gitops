@@ -1,0 +1,135 @@
+keycloak:
+  global:
+    imagePullSecrets:
+      - docker-registry-secret
+
+  image:
+    repository: hdc-services-external/bitnami/keycloak
+
+  auth:
+    existingSecret: keycloak-credentials
+    passwordSecretKey: "admin-password"
+    adminUser: user
+
+  service:
+    type: ClusterIP
+
+  postgresql:
+    enabled: false
+
+  externalDatabase:
+    host: "keycloak-postgresql.keycloak"
+    port: 5432
+    user: bn_keycloak
+    database: bitnami_keycloak
+    existingSecret: keycloak-db-credentials
+    existingSecretPasswordKey: password
+
+  extraEnvVars:
+    - name: KEYCLOAK_LOGLEVEL
+      value: INFO
+    - name: KEYCLOAK_PROXY_ADDRESS_FORWARDING
+      value: "true"
+    - name: JAVA_OPTS
+      value: >-
+        -Dkeycloak.profile.feature.scripts=enabled
+        -Dkeycloak.profile.feature.upload_scripts=enabled
+        -Dkeycloak.profile.feature.token_exchange=enabled
+        -Dkeycloak.adminUrl=https://iam.hdc.ebrains.eu
+        -Dkeycloak.frontendUrl=https://iam.hdc.ebrains.eu
+
+  extraVolumes:
+    - name: antd
+      persistentVolumeClaim:
+        claimName: keycloak-antd
+    - name: theme-cm
+      configMap:
+        name: keycloak-antd-theme
+
+  extraVolumeMounts:
+    - name: antd
+      mountPath: /opt/bitnami/keycloak/themes/keycloak-antd/
+
+  initContainers:
+    - name: download-plugins
+      image: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-external/alpine:3.21
+      imagePullPolicy: IfNotPresent
+      securityContext:
+        # Root required to chown downloaded plugins to uid 1001 (keycloak)
+        runAsUser: 0
+        runAsGroup: 0
+        allowPrivilegeEscalation: false
+      resources:
+        requests:
+          cpu: 100m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 128Mi
+      volumeMounts:
+        - mountPath: /opt/bitnami/keycloak/themes/keycloak-antd/
+          name: antd
+        - mountPath: /tmp/theme
+          name: theme-cm
+      envFrom:
+        - secretRef:
+            name: github-access-token
+      command: ["/bin/sh", "-c"]
+      args:
+        - >
+          set -e;
+          THEME_DIR=/opt/bitnami/keycloak/themes/keycloak-antd;
+          echo "=== Installing theme files ===" &&
+          mkdir -p $THEME_DIR/login/resources/css \
+            $THEME_DIR/login/resources/js \
+            $THEME_DIR/login/resources/img &&
+          cp /tmp/theme/login.ftl $THEME_DIR/login/ &&
+          cp /tmp/theme/template.ftl $THEME_DIR/login/ &&
+          cp /tmp/theme/theme.properties $THEME_DIR/login/ &&
+          cp /tmp/theme/login.css $THEME_DIR/login/resources/css/ &&
+          cp /tmp/theme/jquery.min.js $THEME_DIR/login/resources/js/ &&
+          cp /tmp/theme/login.js $THEME_DIR/login/resources/js/ &&
+          cp /tmp/theme/error.png /tmp/theme/favicon.ico \
+            /tmp/theme/feedback-error-arrow-down.png /tmp/theme/feedback-error-sign.png \
+            /tmp/theme/feedback-success-arrow-down.png /tmp/theme/feedback-success-sign.png \
+            /tmp/theme/feedback-warning-arrow-down.png /tmp/theme/feedback-warning-sign.png \
+            /tmp/theme/HDC-logo.png /tmp/theme/keycloak-bg.png \
+            /tmp/theme/keycloak-logo.png /tmp/theme/keycloak-logo-text.png \
+            /tmp/theme/lock.png /tmp/theme/user.png \
+            $THEME_DIR/login/resources/img/ &&
+          echo "=== Downloading plugins ===" &&
+          apk add --no-cache wget ca-certificates &&
+          mkdir -p $THEME_DIR/plugins &&
+          rm -fv $THEME_DIR/plugins/keycloak-last-login-* $THEME_DIR/plugins/keycloak-auth-require-group-* &&
+          wget --header "Authorization: token $GITHUB_TOKEN"
+          https://maven.pkg.github.com/PilotDataPlatform/keycloak-extensions/org/indocresearch/pilot/keycloak-last-login/1.0.1/keycloak-last-login-1.0.1.jar
+          -P $THEME_DIR/plugins &&
+          wget --header "Authorization: token $GITHUB_TOKEN"
+          https://maven.pkg.github.com/PilotDataPlatform/keycloak-extensions/com/github/thomasdarimont/keycloak/keycloak-auth-require-group/1.0.0/keycloak-auth-require-group-1.0.0.jar
+          -P $THEME_DIR/plugins &&
+          chown -R 1001:1001 $THEME_DIR
+
+  initdbScripts:
+    move_plugins.sh: |
+      #!/bin/bash
+      echo "Checking plugins folder..."
+      ls -trl /opt/bitnami/keycloak/themes/keycloak-antd/plugins
+      echo "Copying plugins to providers..."
+      cp -r /opt/bitnami/keycloak/themes/keycloak-antd/plugins/* /opt/bitnami/keycloak/providers/
+      echo "Done!"
+      ls -trl /opt/bitnami/keycloak/providers
+
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+    hostname: iam.hdc.ebrains.eu
+    pathType: Prefix
+    path: /
+    servicePort: http
+    tls: true
+
+  logging:
+    level: INFO

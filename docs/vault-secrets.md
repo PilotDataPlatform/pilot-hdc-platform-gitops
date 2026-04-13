@@ -31,7 +31,8 @@ vault kv patch secret/postgresql <service>-user-password=$(openssl rand -hex 24)
 vault kv put secret/keycloak \
   admin-password=$(openssl rand -hex 24) \
   postgres-password=$(openssl rand -hex 24) \
-  keycloak-user-password=$(openssl rand -hex 24)
+  keycloak-user-password=$(openssl rand -hex 24) \
+  github-token='<github-pat-with-packages-read-scope>'
 ```
 
 ## Redis (`secret/redis`)
@@ -76,7 +77,8 @@ vault kv put secret/docker-registry/ovh \
 
 ```bash
 vault kv put secret/auth \
-  keycloak-client-secret='<client-secret-from-keycloak>'
+  keycloak-client-secret='<client-secret-from-keycloak>' \
+  freeipa-password='<freeipa-service-account-password>'
 ```
 
 ## Kong (`secret/kong`)
@@ -102,6 +104,17 @@ Replace `<password>` with the `approval-user-password` from `secret/postgresql`.
 vault kv put secret/download \
   download-key=$(openssl rand -hex 32)
 ```
+
+## XWiki (`secret/xwiki`)
+
+```bash
+vault kv put secret/xwiki \
+  postgresql-password=$(openssl rand -hex 24) \
+  xwiki-cfg='<xwiki.cfg-file-contents>' \
+  xwiki-properties='<xwiki.properties-file-contents>'
+```
+
+The `xwiki-cfg` and `xwiki-properties` values are full file contents mounted into the container. Copy from the running dev instance or from backup.
 
 ## KG Integration (`secret/kg-integration`)
 

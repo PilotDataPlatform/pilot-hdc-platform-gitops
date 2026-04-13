@@ -1,0 +1,7 @@
+apiVersion: v2
+name: download-greenroom
+version: 0.1.0
+dependencies:
+  - name: download-service
+    version: "1.0.6"
+    repository: https://pilotdataplatform.github.io/helm-charts/

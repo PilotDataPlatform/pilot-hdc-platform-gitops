@@ -48,7 +48,6 @@ bff-cli-service:
     CORE_ZONE_LABEL: "Core"
     GREEN_ZONE_LABEL: "Greenroom"
 
-    # TODO: fill when these services are deployed on OVH
     AUDIT_TRAIL_SERVICE: ""
     HPC_SERVICE: ""
     KG_SERVICE: ""
@@ -59,7 +58,6 @@ bff-cli-service:
     # Guacamole CLI auth
     CLI_PUBLIC_KEY_PATH: "/var/run/secrets/guacamole/jwt-key.pub"
 
-    # TODO: replace with OVH pod CIDR when JupyterHub is deployed
     JUPYTER_IP_LOWER: "10.0.0.0"
     JUPYTER_IP_UPPER: "10.255.255.255"
 
