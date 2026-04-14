@@ -1,0 +1,45 @@
+portal:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/portal
+    pullPolicy: IfNotPresent
+    # tag from versions.yaml: portal.image.tag = "1.7.5-hdc-ovh-prod"
+
+  fullnameOverride: portal
+  replicaCount: 1
+  container:
+    port: 80
+  service:
+    type: ClusterIP
+    port: 3000
+    targetPort: 80
+  imagePullSecrets:
+    - name: docker-registry-secret
+  appConfig:
+    env: prod
+  resources:
+    requests:
+      cpu: 10m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 500Mi
+  readinessProbe:
+    tcpSocket:
+      port: 80
+    initialDelaySeconds: 5
+    periodSeconds: 10
+  ingress:
+    enabled: true
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/proxy-body-size: 20m
+    tls: true
+    hostname: hdc.ebrains.eu
+    path: /
+    pathType: Prefix
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
