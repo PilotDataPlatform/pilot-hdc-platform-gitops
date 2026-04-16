@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: project-resources
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/PilotDataPlatform/pilot-hdc-platform-gitops.git
+        revision: main
+        files:
+          - path: "clusters/prod/workbench/projects/*.yaml"
+  syncPolicy:
+    applicationsSync: create-update
+  template:
+    metadata:
+      name: 'project-resources-{{ .name }}'
+      namespace: argocd
+      annotations:
+        argocd.argoproj.io/sync-wave: "11"
+      # NO finalizer — manages PVCs
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/PilotDataPlatform/pilot-hdc-platform-gitops.git
+        targetRevision: main
+        path: clusters/prod/workbench/project-resources
+        helm:
+          releaseName: project-resources
+          valueFiles:
+            - ../../registry.yaml
+            - values.yaml
+          parameters:
+            - name: projectName
+              value: '{{ .name }}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: 'project-{{ .name }}'
+      syncPolicy:
+        automated:
+          prune: false
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

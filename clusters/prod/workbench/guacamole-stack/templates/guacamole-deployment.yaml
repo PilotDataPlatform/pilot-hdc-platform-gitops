@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: guacamole
+  labels:
+    app.kubernetes.io/name: guacamole
+    {{- include "guacamole-stack.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.guacamole.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: guacamole
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: guacamole
+        {{- include "guacamole-stack.labels" . | nindent 8 }}
+    spec:
+      imagePullSecrets:
+        - name: docker-registry-secret
+      containers:
+        - name: guacamole
+          image: "{{ .Values.global.imageRegistry }}/{{ .Values.guacamole.image.repository }}:{{ .Values.guacamole.image.tag }}"
+          imagePullPolicy: {{ .Values.guacamole.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: GUACAMOLE_HOME
+              value: /etc/guacamole
+            - name: GUACD_HOSTNAME
+              value: guacd.{{ .Release.Namespace }}.svc.cluster.local
+            - name: GUACD_PORT
+              value: "4822"
+            - name: POSTGRES_HOSTNAME
+              value: postgres-guacamole.{{ .Release.Namespace }}.svc.cluster.local
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DATABASE
+              value: guacamole_db
+            - name: POSTGRES_USER
+              value: guacamole_user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: guacamole-pg-credentials
+                  key: password
+            - name: POSTGRES_ABSOLUTE_MAX_CONNECTIONS
+              value: "{{ .Values.guacamoleProperties.postgresqlAbsoluteMaxConnections }}"
+            - name: OPENID_AUTHORIZATION_ENDPOINT
+              value: https://{{ .Values.keycloakDomain }}/realms/hdc/protocol/openid-connect/auth
+            - name: OPENID_JWKS_ENDPOINT
+              value: https://{{ .Values.keycloakDomain }}/realms/hdc/protocol/openid-connect/certs
+            - name: OPENID_ISSUER
+              value: https://{{ .Values.keycloakDomain }}/realms/hdc
+            - name: OPENID_CLIENT_ID
+              value: guacamole-{{ .Values.projectName }}
+            - name: OPENID_REDIRECT_URI
+              value: https://{{ .Values.domain }}/workbench/{{ .Values.projectName }}/guacamole/
+            - name: OPENID_USERNAME_CLAIM_TYPE
+              value: {{ .Values.oidc.usernameClaim }}
+            - name: OPENID_SCOPE
+              value: {{ .Values.oidc.scope }}
+          volumeMounts:
+            - name: guacamole-config
+              mountPath: /etc/guacamole
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.guacamole.resources | nindent 12 }}
+      volumes:
+        - name: guacamole-config
+          configMap:
+            name: guacamole-configuration
