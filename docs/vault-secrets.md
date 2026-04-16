@@ -123,6 +123,14 @@ vault kv put secret/kg-integration \
   account-secret='<kg-service-account-secret>'
 ```
 
+## Workspace (`secret/workspace`)
+
+```bash
+vault kv put secret/workspace \
+  guacamole-username='guacadmin' \
+  guacamole-password='<guacamole-admin-password>'
+```
+
 ## BFF CLI (`secret/bff-cli`)
 
 ```bash
