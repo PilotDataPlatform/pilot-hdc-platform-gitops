@@ -1,0 +1,7 @@
+apiVersion: v2
+name: jupyterhub-stack
+version: 0.1.0
+dependencies:
+  - name: jupyterhub
+    version: "3.3.8"
+    repository: https://pilotdataplatform.github.io/helm-charts/

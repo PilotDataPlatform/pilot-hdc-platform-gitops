@@ -1,0 +1,7 @@
+apiVersion: v2
+name: superset-stack
+version: 0.1.0
+dependencies:
+  - name: superset
+    version: "0.8.8"
+    repository: https://pilotdataplatform.github.io/helm-charts/

@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: jupyterhub
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/PilotDataPlatform/pilot-hdc-platform-gitops.git
+        revision: main
+        files:
+          - path: "clusters/prod/workbench/projects/*.yaml"
+  syncPolicy:
+    applicationsSync: create-update
+  template:
+    metadata:
+      name: 'jupyterhub-{{ .name }}'
+      namespace: argocd
+      annotations:
+        argocd.argoproj.io/sync-wave: "13"
+      # NO finalizer — stateful app (hub PVC + user PVCs)
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/PilotDataPlatform/pilot-hdc-platform-gitops.git
+        targetRevision: main
+        path: clusters/prod/workbench/jupyterhub
+        helm:
+          releaseName: jupyterhub
+          valueFiles:
+            - ../../registry.yaml
+            - values.yaml
+          parameters:
+            - name: projectName
+              value: '{{ .name }}'
+            - name: domain
+              value: 'hdc.ebrains.eu'
+            - name: jupyterhub.hub.baseUrl
+              value: '/workbench/{{ .name }}/j/'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: 'project-{{ .name }}'
+      syncPolicy:
+        automated:
+          prune: false
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

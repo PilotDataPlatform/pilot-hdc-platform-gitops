@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: superset
+  labels:
+    app.kubernetes.io/name: superset
+    {{- include "superset-stack.labels" . | nindent 4 }}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/proxy-body-size: 20m
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://{{ .Values.domain }}"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - {{ .Values.projectName }}-superset.{{ .Values.domain }}
+      secretName: {{ .Values.projectName }}-superset-tls
+  rules:
+    - host: {{ .Values.projectName }}-superset.{{ .Values.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: superset
+                port:
+                  number: 8088
