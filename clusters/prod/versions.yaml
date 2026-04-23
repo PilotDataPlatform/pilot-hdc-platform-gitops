@@ -5,7 +5,7 @@
 # -- HDC service image tags (auto-bumped by CI) --
 auth-service:
   image:
-    tag: "2.2.38"
+    tag: "2.2.39"
 metadata-service:
   image:
     tag: "2.2.13"
