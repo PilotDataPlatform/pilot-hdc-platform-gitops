@@ -35,7 +35,7 @@ base-chart:
     COLLAB_ENV: "prod"
     COLLAB_PREFIX: "hdc-"
     # Keycloak
-    KEYCLOAK_URL: "http://keycloak.keycloak/auth/"
+    KEYCLOAK_URL: "https://iam.hdc.ebrains.eu/"
     KEYCLOAK_REALM: "hdc"
     KEYCLOAK_BROKER: "ebrains-keycloak"
     # Deployed services
