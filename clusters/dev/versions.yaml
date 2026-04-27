@@ -44,7 +44,7 @@ workspace-service:
     tag: "2.2.7"
 portal:
   image:
-    tag: "1.7.8-hdc-ovh-dev"
+    tag: "1.7.9-hdc-ovh-dev"
 # BFF and dataset use base-chart-hdc — tags managed in their values.yaml by CI (update_gitops_versions.yml)
 
 # -- Infrastructure image tags (manually managed) --
