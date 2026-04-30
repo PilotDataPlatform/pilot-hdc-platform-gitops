@@ -18,7 +18,7 @@ gha-runner-scale-set:
       serviceAccountName: arc-runner
       containers:
         - name: runner
-          image: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-external/gh-runner:2.332.0-0
+          image: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-external/gh-runner:2.334.0-0
           command: ["/home/runner/run.sh"]
           resources:
             requests:
