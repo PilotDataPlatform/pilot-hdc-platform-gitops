@@ -35,10 +35,9 @@ notification-service:
     PLATFORM_NAME: PILOT
     namespace: utility
     OPEN_TELEMETRY_ENABLED: "false"
-    POSTFIX: TODO-PROD-SMTP-RELAY  # TODO: replace with prod SMTP relay
-    SMTP_PORT: "25"
-    SMTP_USER: ""
-    SMTP_PASS: ""
+    POSTFIX_URL: "pro2.mail.ovh.net"
+    POSTFIX_PORT: "587"
+    SMTP_USER: "no-reply@hdc.ebrains.eu"
     EMAIL_ATTACHMENT_MAX_SIZE_BYTES: "2097152"
     # Database
     RDS_HOST: postgres.utility
@@ -53,6 +52,11 @@ notification-service:
         secretKeyRef:
           name: notification-credentials
           key: notification-user-password
+    - name: SMTP_PASS
+      valueFrom:
+        secretKeyRef:
+          name: notification-credentials
+          key: smtp-password
 
   resources:
     requests:
@@ -71,7 +75,7 @@ notification-service:
 
   livenessProbe:
     httpGet:
-      path: /v1/health
+      path: /v1/health/
       port: 5065
     periodSeconds: 10
     timeoutSeconds: 3
