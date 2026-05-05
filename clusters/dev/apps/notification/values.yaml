@@ -75,7 +75,7 @@ notification-service:
 
   livenessProbe:
     httpGet:
-      path: /v1/health
+      path: /v1/health/
       port: 5065
     periodSeconds: 10
     timeoutSeconds: 3
