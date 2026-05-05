@@ -39,9 +39,9 @@ auth-service:
     DOMAIN_NAME: "https://dev.hdc.ebrains.eu"
     START_PATH: hdc
     GUIDE_PATH: ""
-    EMAIL_SUPPORT: support@hdc.ebrains.eu
-    EMAIL_ADMIN: admin@hdc.ebrains.eu
-    EMAIL_HELPDESK: helpdesk@hdc.ebrains.eu
+    EMAIL_SUPPORT: "hdc@ebrains.eu"
+    EMAIL_ADMIN: "hdc@ebrains.eu"
+    EMAIL_HELPDESK: "hdc@ebrains.eu"
     PLATFORM_NAME: HDC
     PROJECT_NAME: HDC
     OPEN_TELEMETRY_ENABLED: "false"
