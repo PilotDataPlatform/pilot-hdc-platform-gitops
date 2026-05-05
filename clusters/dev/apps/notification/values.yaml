@@ -36,7 +36,7 @@ notification-service:
     namespace: utility
     OPEN_TELEMETRY_ENABLED: "false"
     POSTFIX_URL: "pro2.mail.ovh.net"
-    POSTFIX_PORT: 587
+    POSTFIX_PORT: "587"
     SMTP_USER: "no-reply@hdc.ebrains.eu"
     EMAIL_ATTACHMENT_MAX_SIZE_BYTES: "2097152"
     # Database
