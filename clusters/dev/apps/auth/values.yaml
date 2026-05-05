@@ -36,7 +36,7 @@ auth-service:
     REDIS_PORT: "6379"
     FREEIPA_URL: "ldap.dev.hdc.ebrains.eu"
     ENABLE_ACTIVE_DIRECTORY: "false"
-    DOMAIN_NAME: "https://portal.dev.hdc.ebrains.eu"
+    DOMAIN_NAME: "https://dev.hdc.ebrains.eu"
     START_PATH: hdc
     GUIDE_PATH: ""
     EMAIL_SUPPORT: support@hdc.ebrains.eu

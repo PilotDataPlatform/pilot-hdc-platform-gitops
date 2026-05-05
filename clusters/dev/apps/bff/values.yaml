@@ -36,17 +36,17 @@ base-chart-hdc:
     config_center_enabled: false
   extraEnv:
     # Platform config
-    SITE_DOMAIN: "https://portal.dev.hdc.ebrains.eu"
+    SITE_DOMAIN: "https://dev.hdc.ebrains.eu"
     CORE_ZONE_LABEL: "Core"
     GREENROOM_ZONE_LABEL: "Greenroom"
     PROJECT_NAME: "HDC"
     KEYCLOAK_REALM: "hdc"
     KONG_PATH: "/pilot/"
     RESOURCE_REQUEST_ADMIN: "testadmin"
-    EMAIL_SUPPORT: "support@hdc.ebrains.eu"
-    EMAIL_ADMIN: "admin@hdc.ebrains.eu"
-    EMAIL_HELPDESK: "helpdesk@hdc.ebrains.eu"
-    INVITATION_URL_LOGIN: "https://portal.dev.hdc.ebrains.eu/login/"
+    EMAIL_SUPPORT: "hdc@ebrains.eu"
+    EMAIL_ADMIN: "hdc@ebrains.eu"
+    EMAIL_HELPDESK: "hdc@ebrains.eu"
+    INVITATION_URL_LOGIN: "https://dev.hdc.ebrains.eu/login/"
     EMAIL_SUPPORT_REPLY_TO: "no-reply@hdc.ebrains.eu"
     # Redis
     REDIS_HOST: "redis-master.redis"
