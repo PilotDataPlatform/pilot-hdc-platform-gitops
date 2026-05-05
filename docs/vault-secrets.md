@@ -131,6 +131,13 @@ vault kv put secret/workspace \
   guacamole-password='<guacamole-admin-password>'
 ```
 
+## Notification (`secret/notification`)
+
+```bash
+vault kv put secret/notification \
+  smtp-password='<smtp-password>'
+```
+
 ## BFF CLI (`secret/bff-cli`)
 
 ```bash
