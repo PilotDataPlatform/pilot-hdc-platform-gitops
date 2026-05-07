@@ -1,7 +1,7 @@
 base-chart-hdc:
   image:
     repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/dataset
-    tag: "2.3.41"
+    tag: "2.3.42"
     tagPrefix: "dataset"
     pullPolicy: IfNotPresent
   initContainers:
