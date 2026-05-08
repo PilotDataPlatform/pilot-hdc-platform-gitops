@@ -75,9 +75,10 @@ jupyterhub:
                 'NB_UID': '1000',
                 'IPYTHONDIR': '/tmp',
                 'PATH': '/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/shared',
-                'base_url': 'https://dev.hdc.ebrains.eu/',
-                'url_bff': 'https://dev.hdc.ebrains.eu/cli',
+                'base_url': 'https://api.dev.hdc.ebrains.eu/pilot/',
+                'url_bff': 'https://api.dev.hdc.ebrains.eu/pilot/cli',
                 'url_keycloak': 'https://iam.dev.hdc.ebrains.eu/realms/hdc/protocol/openid-connect',
+                'url_harbor': 'https://127.0.0.1',
                 'keycloak_device_client_id': 'cli'
             })
         c.Spawner.pre_spawn_hook = notebook_dir_hook
