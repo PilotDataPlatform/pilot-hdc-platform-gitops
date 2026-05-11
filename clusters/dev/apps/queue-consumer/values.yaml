@@ -29,7 +29,7 @@ queue-service:
     move_pipeline_folder: "data_delete_folder"
     # -- Pipeline images (OVH registry) --
     bids_validate_image: "n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/pipelines/bids-validator:bids-validator-2.2.15"
-    data_transfer_image: "n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/pipelines/filecopy:filecopy-2.2.16"
+    data_transfer_image: "n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/pipelines/filecopy:filecopy-2.2.20"
     # -- Storage (pass-through to spawned Jobs — consumer doesn't touch FS itself) --
     data_lake: "/data/core-storage"
     claim_name: "greenroom-storage"
