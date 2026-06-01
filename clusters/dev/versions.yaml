@@ -14,7 +14,7 @@ project-service:
     tag: "2.3.9"
 dataops-service:
   image:
-    tag: "2.5.8"
+    tag: "2.5.11"
 notification-service:
   image:
     tag: "2.2.13"
