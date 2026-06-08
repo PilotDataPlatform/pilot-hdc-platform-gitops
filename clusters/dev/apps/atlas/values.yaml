@@ -36,6 +36,11 @@ base-chart-hdc:
     MANAGE_LOCAL_HBASE: "true"
     MANAGE_LOCAL_SOLR: "true"
 
+  extraVolumes:
+     - name: atlas-storage
+       persistentVolumeClaim:
+         claimName: atlas-storage
+
   extraVolumeMounts:
     - name: atlas-storage
       mountPath: /opt/apache-atlas-2.1.0/data
