@@ -2,6 +2,7 @@ base-chart-hdc:
   image:
     repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-external/apache-atlas
     tag: "2.1.0"
+    tagPrefix: "legacy"
     pullPolicy: IfNotPresent
 
   fullnameOverride: atlas
