@@ -18,6 +18,9 @@ base-chart-hdc:
     command: [ "/bin/bash", "-c" ]
     args:
       - |
+        ADMIN_PASSWORD_HASH=$(echo -n "${ADMIN_PASSWORD}" | sha256sum | awk '{print $1}')
+        sed -i "s/^\(admin=ADMIN::\).*/\1${ADMIN_PASSWORD_HASH}/" /opt/apache-atlas-2.1.0/conf/users-credentials.properties
+        
         /opt/apache-atlas-2.1.0/bin/atlas_start.py &
         tail -F /opt/apache-atlas-2.1.0/logs/application.log
     ports:
@@ -40,6 +43,13 @@ base-chart-hdc:
     LOG4J_FORMAT_MSG_NO_LOOKUPS: "true"
     MANAGE_LOCAL_HBASE: "true"
     MANAGE_LOCAL_SOLR: "true"
+
+  extraEnvYaml:
+    - name: ADMIN_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: atlas-credentials
+          key: atlas-password
 
   extraVolumes:
     - name: atlas-storage
