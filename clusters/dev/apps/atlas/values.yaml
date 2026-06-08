@@ -70,7 +70,7 @@ base-chart-hdc:
       path: /
       port: 21000
       scheme: HTTP
-    initialDelaySeconds: 60
+    initialDelaySeconds: 300
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 3
