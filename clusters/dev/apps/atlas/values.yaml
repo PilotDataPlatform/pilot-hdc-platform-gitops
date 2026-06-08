@@ -1,0 +1,51 @@
+base-chart-hdc:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-external/apache-atlas
+    tag: "2.1.0"
+    pullPolicy: IfNotPresent
+
+  fullnameOverride: atlas
+
+  labels:
+    app: atlas
+    instance: atlas
+
+  replicaCount: 1
+
+  container:
+    name: atlas
+    command: /opt/apache-atlas-2.1.0/bin/atlas_start.py
+    ports:
+      - name: http
+        containerPort: 21000
+        protocol: TCP
+
+  service:
+    type: ClusterIP
+    ports:
+      - port: 21000
+        targetPort: 21000
+        protocol: TCP
+        name: http
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  extraEnv:
+    LOG4J_FORMAT_MSG_NO_LOOKUPS: "true"
+    MANAGE_LOCAL_HBASE: "true"
+    MANAGE_LOCAL_SOLR: "true"
+
+  extraVolumeMounts:
+    - name: atlas-storage
+      mountPath: /opt/apache-atlas-2.1.0/data
+      subPath: data
+    - name: atlas-storage
+      mountPath: /opt/apache-atlas-2.1.0/logs
+      subPath: logs
+
+  readinessProbe:
+    tcpSocket:
+      port: 21000
+    initialDelaySeconds: 60
+    periodSeconds: 10
