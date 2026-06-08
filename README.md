@@ -10,7 +10,7 @@ This repo uses ArgoCD's app-of-apps pattern: a root Application (`root-app.yaml`
 ### Sync-Wave Order
 
 | Wave | App | Notes |
-|------|-----|------|
+|------|-----|-------|
 | -1 | argo-cd | GitOps controller |
 | 0 | cert-manager | TLS certificate management |
 | 1 | ingress-nginx | Ingress controller |

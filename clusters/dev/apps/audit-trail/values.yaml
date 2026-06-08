@@ -19,7 +19,7 @@ audit-trail-service:
   extraEnv:
     ATLAS_ADMIN: "admin"
     ATLAS_HOST: "atlas.utility"
-    ATLAS_PORT: 21000
+    ATLAS_PORT: "21000"
 
   extraEnvYaml:
     - name: ATLAS_PASSWD
