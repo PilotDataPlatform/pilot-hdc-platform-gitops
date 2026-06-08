@@ -37,9 +37,9 @@ base-chart-hdc:
     MANAGE_LOCAL_SOLR: "true"
 
   extraVolumes:
-     - name: atlas-storage
-       persistentVolumeClaim:
-         claimName: atlas-storage
+    - name: atlas-storage
+      persistentVolumeClaim:
+        claimName: atlas-storage
 
   extraVolumeMounts:
     - name: atlas-storage
