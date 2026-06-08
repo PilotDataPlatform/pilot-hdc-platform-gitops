@@ -38,7 +38,7 @@ search-service:
     tag: "2.2.10"
 audit-trail-service:
   image:
-    tag: "2.2.9"
+    tag: "2.2.10"
 bff-cli-service:
   image:
     tag: "bff-cli-2.2.15"
