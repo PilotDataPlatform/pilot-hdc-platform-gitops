@@ -15,7 +15,11 @@ base-chart-hdc:
 
   container:
     name: atlas
-    command: ["/opt/apache-atlas-2.1.0/bin/atlas_start.py"]
+    command: [ "/bin/bash", "-c" ]
+    args:
+      - |
+        /opt/apache-atlas-2.1.0/bin/atlas_start.py &
+        tail -F /opt/apache-atlas-2.1.0/logs/application.log
     ports:
       - name: http
         containerPort: 21000
