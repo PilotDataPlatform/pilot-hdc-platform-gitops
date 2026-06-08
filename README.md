@@ -51,6 +51,7 @@ This repo uses ArgoCD's app-of-apps pattern: a root Application (`root-app.yaml`
 | 9 | kong | API gateway |
 | 9 | metadata-event-handler | Kafka→ES event indexer |
 | 9 | kg-integration | EBRAINS Knowledge Graph integration |
+| 9 | audit-trail | |
 | 10 | bff | Backend-for-frontend (web) |
 | 10 | bff-cli | Backend-for-frontend (CLI) |
 | 11 | portal | Frontend UI |

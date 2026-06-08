@@ -147,6 +147,13 @@ vault kv put secret/bff-cli \
   guacamole-jwt-public-key='<public-key-pem>'
 ```
 
+## Atlas (`secret/atlas`)
+
+```bash
+vault kv put secret/atlas \
+  atlas-password=$(openssl rand -hex 24)
+```
+
 ## Guacamole (`secret/guacamole`)
 
 ```bash
