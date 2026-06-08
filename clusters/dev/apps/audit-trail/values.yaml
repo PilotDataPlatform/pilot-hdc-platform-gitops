@@ -1,0 +1,61 @@
+audit-trail-service:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/audit-trail
+    pullPolicy: IfNotPresent
+
+  fullnameOverride: audit-trail
+  replicaCount: 1
+
+  container:
+    port: 5077
+
+  service:
+    type: ClusterIP
+    port: 5077
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  extraEnv:
+    ATLAS_ADMIN: "admin"
+    ATLAS_HOST: "atlas.utility"
+    ATLAS_PORT: 21000
+
+  extraEnvYaml:
+    - name: ATLAS_PASSWD
+      valueFrom:
+        secretKeyRef:
+          name: audit-trail-credentials
+          key: atlas-password
+
+  resources:
+    limits:
+      cpu: "1"
+      memory: 500Mi
+    requests:
+      cpu: 10m
+      memory: 50Mi
+
+  readinessProbe:
+    failureThreshold: 3
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    successThreshold: 1
+    tcpSocket:
+      port: 5077
+
+  livenessProbe:
+    failureThreshold: 3
+    httpGet:
+      path: /v1/health/
+      port: 5077
+      scheme: HTTP
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 3
+
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 33%
+    type: RollingUpdate
