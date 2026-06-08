@@ -49,6 +49,14 @@ base-chart-hdc:
       mountPath: /opt/apache-atlas-2.1.0/logs
       subPath: logs
 
+  resources:
+    requests:
+      cpu: 10m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 500Mi
+
   readinessProbe:
     tcpSocket:
       port: 21000
