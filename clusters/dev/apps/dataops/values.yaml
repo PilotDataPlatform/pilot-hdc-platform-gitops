@@ -34,7 +34,6 @@ dataops-service:
     REDIS_PORT: "6379"
     REDIS_DB: "0"
     WORKERS: "2"
-    LINEAGE_SERVICE: "http://lineage.utility:5064"
     QUEUE_SERVICE: "http://queue-producer.greenroom:6060"
     METADATA_SERVICE: "http://metadata.utility:5066"
     AUTH_SERVICE: "http://auth.utility:5061"
