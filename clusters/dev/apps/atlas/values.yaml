@@ -74,3 +74,6 @@ base-chart-hdc:
     periodSeconds: 10
     successThreshold: 1
     timeoutSeconds: 3
+
+  updateStrategy:
+    type: Recreate
