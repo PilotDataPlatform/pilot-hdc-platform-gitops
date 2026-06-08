@@ -61,7 +61,7 @@ base-chart-hdc:
   readinessProbe:
     tcpSocket:
       port: 21000
-    initialDelaySeconds: 60
+    initialDelaySeconds: 300
     periodSeconds: 10
 
   livenessProbe:
