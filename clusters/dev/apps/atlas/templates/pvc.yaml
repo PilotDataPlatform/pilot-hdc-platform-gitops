@@ -5,8 +5,8 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   accessModes:
-    - ReadWriteMany
-  storageClassName: nfs-client
+    - ReadWriteOncePod
+  storageClassName: csi-cinder-high-speed
   resources:
     requests:
       storage: 5Gi
