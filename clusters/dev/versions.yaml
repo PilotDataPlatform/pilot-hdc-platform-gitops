@@ -33,6 +33,9 @@ approval-service:
 metadata-event-handler:
   image:
     tag: "metadata_event_handler-1.0.8"
+lineage-event-handler:
+  image:
+    tag: "lineage_event_handler-1.0.8"
 search-service:
   image:
     tag: "2.2.10"
