@@ -1,4 +1,4 @@
-metadata-event-handler:
+lineage-event-handler:
   image:
     repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/lineage_event_handler
     pullPolicy: IfNotPresent
@@ -24,7 +24,7 @@ metadata-event-handler:
     ATLAS_API: "http://atlas.utility:21000"
     ATLAS_ENTITY_TYPE: "metadata_items"
     ATLAS_ADMIN: "admin"
-    SEEK_TO_BEGINNING: true
+    SEEK_TO_BEGINNING: "true"
 
   extraEnvYaml:
     - name: ATLAS_PASSWD
