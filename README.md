@@ -48,8 +48,10 @@ This repo uses ArgoCD's app-of-apps pattern: a root Application (`root-app.yaml`
 | 8 | download-greenroom | Download service (greenroom ns) |
 | 8 | download-core | Download service (core ns) |
 | 8 | search | Search service (ES-backed) |
+| 8 | atlas | Apache Atlas (lineage) |
 | 9 | kong | API gateway |
 | 9 | metadata-event-handler | Kafka→ES event indexer |
+| 9 | lineage-event-handler | Kafka→Atlas event indexer |
 | 9 | kg-integration | EBRAINS Knowledge Graph integration |
 | 9 | audit-trail | |
 | 10 | bff | Backend-for-frontend (web) |

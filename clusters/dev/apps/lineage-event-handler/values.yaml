@@ -1,0 +1,48 @@
+metadata-event-handler:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-image/lineage_event_handler
+    pullPolicy: IfNotPresent
+
+  fullnameOverride: lineage-event-handler
+  replicaCount: 1
+
+  container:
+    port: 5067
+
+  service:
+    type: ClusterIP
+    port: 5067
+    targetPort: 5067
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  extraEnv:
+    KAFKA_TOPICS: '["metadata.items.activity"]'
+    KAFKA_SERVICE: "kafka.utility:9092"
+    KAFKA_GROUP_ID: "lineage_consumer_group"
+    ATLAS_API: "http://atlas.utility:21000"
+    ATLAS_ENTITY_TYPE: "metadata_items"
+    ATLAS_ADMIN: "admin"
+    SEEK_TO_BEGINNING: true
+
+  extraEnvYaml:
+    - name: ATLAS_PASSWD
+      valueFrom:
+        secretKeyRef:
+          name: atlas-credentials
+          key: atlas-password
+
+  resources:
+    limits:
+      cpu: "1"
+      memory: 100Mi
+    requests:
+      cpu: 10m
+      memory: 10Mi
+
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 33%
+    type: RollingUpdate
