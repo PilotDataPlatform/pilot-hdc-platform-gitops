@@ -17,9 +17,12 @@ lineage-event-handler:
   imagePullSecrets:
     - name: docker-registry-secret
 
+  # appConfig: KAFKA_SERVICE is rendered by the chart template
+  appConfig:
+    KAFKA_SERVICE: "kafka.utility:9092"
+
   extraEnv:
     KAFKA_TOPICS: '["metadata.items.activity"]'
-    KAFKA_SERVICE: "kafka.utility:9092"
     KAFKA_GROUP_ID: "lineage_consumer_group"
     ATLAS_API: "http://atlas.utility:21000"
     ATLAS_ENTITY_TYPE: "metadata_items"
