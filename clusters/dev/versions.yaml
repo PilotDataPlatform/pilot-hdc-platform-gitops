@@ -32,7 +32,7 @@ approval-service:
     tag: "2.2.9"
 metadata-event-handler:
   image:
-    tag: "metadata_event_handler-1.0.8"
+    tag: "metadata_event_handler-1.0.9"
 lineage-event-handler:
   image:
     tag: "lineage_event_handler-1.0.9"
