@@ -1,0 +1,7 @@
+apiVersion: v2
+name: audit-trail
+version: 0.1.0
+dependencies:
+  - name: audit-trail-service
+    version: "0.2.0"
+    repository: https://pilotdataplatform.github.io/helm-charts/

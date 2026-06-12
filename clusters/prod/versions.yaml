@@ -14,7 +14,7 @@ project-service:
     tag: "2.3.9"
 dataops-service:
   image:
-    tag: "2.5.8"
+    tag: "2.5.11"
 notification-service:
   image:
     tag: "2.2.13"
@@ -32,10 +32,16 @@ approval-service:
     tag: "2.2.9"
 metadata-event-handler:
   image:
-    tag: "metadata_event_handler-1.0.8"
+    tag: "metadata_event_handler-1.0.9"
+lineage-event-handler:
+  image:
+    tag: "lineage_event_handler-1.0.9"
 search-service:
   image:
     tag: "2.2.10"
+audit-trail-service:
+  image:
+    tag: "audit-trail-2.2.10"
 bff-cli-service:
   image:
     tag: "bff-cli-2.2.15"
@@ -98,6 +104,7 @@ charts:
   download-service: "1.0.6"
   metadata-event-handler: "0.1.1"
   search-service: "0.2.2"
+  audit-trail-service: "0.2.0"
   base-chart: "0.1.0"
   bff-cli-service: "0.1.0"
   workspace-service: "0.2.0"
