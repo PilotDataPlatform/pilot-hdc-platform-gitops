@@ -1,0 +1,91 @@
+base-chart-hdc:
+  image:
+    repository: n47w5524.c1.de1.container-registry.ovh.net/hdc-services-external/apache-atlas
+    tag: "2.1.0"
+    tagPrefix: "legacy"
+    pullPolicy: IfNotPresent
+
+  fullnameOverride: atlas
+
+  labels:
+    app: atlas
+    instance: atlas
+
+  replicaCount: 1
+
+  container:
+    name: atlas
+    command: [ "/bin/bash", "-c" ]
+    args:
+      - |
+        ADMIN_PASSWORD_HASH=$(echo -n "${ADMIN_PASSWORD}" | sha256sum | awk '{print $1}')
+        sed -i "s/^\(admin=ADMIN::\).*/\1${ADMIN_PASSWORD_HASH}/" /opt/apache-atlas-2.1.0/conf/users-credentials.properties
+        
+        /opt/apache-atlas-2.1.0/bin/atlas_start.py &
+        tail -F /opt/apache-atlas-2.1.0/logs/application.log
+    ports:
+      - name: http
+        containerPort: 21000
+        protocol: TCP
+
+  service:
+    type: ClusterIP
+    ports:
+      - port: 21000
+        targetPort: 21000
+        protocol: TCP
+        name: http
+
+  imagePullSecrets:
+    - name: docker-registry-secret
+
+  extraEnv:
+    LOG4J_FORMAT_MSG_NO_LOOKUPS: "true"
+    MANAGE_LOCAL_HBASE: "true"
+    MANAGE_LOCAL_SOLR: "true"
+
+  extraEnvYaml:
+    - name: ADMIN_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: atlas-credentials
+          key: atlas-password
+
+  extraVolumes:
+    - name: atlas-storage
+      persistentVolumeClaim:
+        claimName: atlas-storage
+
+  extraVolumeMounts:
+    - name: atlas-storage
+      mountPath: /opt/apache-atlas-2.1.0/data
+      subPath: data
+    - name: atlas-storage
+      mountPath: /opt/apache-atlas-2.1.0/logs
+      subPath: logs
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 1024Mi
+    limits:
+      cpu: 500m
+      memory: 2048Mi
+
+  readinessProbe:
+    tcpSocket:
+      port: 21000
+    initialDelaySeconds: 60
+    periodSeconds: 10
+
+  livenessProbe:
+    failureThreshold: 10
+    tcpSocket:
+      port: 21000
+    initialDelaySeconds: 1800
+    periodSeconds: 30
+    successThreshold: 1
+    timeoutSeconds: 10
+
+  updateStrategy:
+    type: Recreate
