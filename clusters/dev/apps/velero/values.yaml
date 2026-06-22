@@ -9,7 +9,6 @@ velero:
           s3Url: https://s3.de.io.cloud.ovh.net
           s3ForcePathStyle: "true"
           checksumAlgorithm: ""
-          profile: "dev-backup"
 
   initContainers:
     - name: velero-plugin-for-aws
