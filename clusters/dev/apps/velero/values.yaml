@@ -1,6 +1,5 @@
 velero:
   configuration:
-    provider: aws
     backupStorageLocation:
       - name: dev-backup
         provider: aws
