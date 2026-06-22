@@ -59,6 +59,7 @@ This repo uses ArgoCD's app-of-apps pattern: a root Application (`root-app.yaml`
 | 11 | portal | Frontend UI |
 | 12 | workspace | Workspace orchestration service |
 | 13 | guacamole-{project} | Per-project Guacamole stack (ApplicationSet) |
+| 14 | velero | Cluster backup |
 
 **Note**: `registry-secrets` (wave 3) will show `SecretSyncError` until Vault is unsealed and the ClusterSecretStore can connect to it — expected on first deploy, resolves via `selfHeal: true`.
 

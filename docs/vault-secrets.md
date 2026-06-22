@@ -154,6 +154,14 @@ vault kv put secret/atlas \
   atlas-password=$(openssl rand -hex 24)
 ```
 
+## Velero (`secret/velero`)
+
+```bash
+vault kv put secret/velero \
+  velero-bucket-access-key='<s3-access-key>' \
+  velero-bucket-secret-key='<s3-secret-key>'
+```
+
 ## Guacamole (`secret/guacamole`)
 
 ```bash
