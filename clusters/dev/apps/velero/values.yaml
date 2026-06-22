@@ -22,6 +22,8 @@ velero:
     useSecret: true
     existingSecret: velero-bucket-credentials
 
+  snapshotsEnabled: false
+
   schedules:
     daily-cluster-backup:
       schedule: "0 0 * * *"
