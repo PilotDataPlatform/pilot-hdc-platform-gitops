@@ -1,7 +1,7 @@
 velero:
   configuration:
     backupStorageLocation:
-      - name: dev-backup
+      - name: default
         provider: aws
         bucket: pilot-hdc-dev-backup-velero-bucket
         config:
