@@ -1,0 +1,31 @@
+velero:
+  configuration:
+    backupStorageLocation:
+      - name: default
+        provider: aws
+        bucket: pilot-hdc-prod-backup-velero-bucket
+        config:
+          region: de
+          s3Url: https://s3.de.io.cloud.ovh.net
+          s3ForcePathStyle: "true"
+          checksumAlgorithm: ""
+
+  initContainers:
+    - name: velero-plugin-for-aws
+      image: velero/velero-plugin-for-aws:v1.14.1
+      imagePullPolicy: IfNotPresent
+      volumeMounts:
+        - mountPath: /target
+          name: plugins
+
+  credentials:
+    useSecret: true
+    existingSecret: velero-bucket-credentials
+
+  snapshotsEnabled: false
+
+  schedules:
+    daily-cluster-backup:
+      schedule: "0 0 * * *"
+      template:
+        ttl: "720h"
