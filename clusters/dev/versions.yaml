@@ -20,7 +20,7 @@ notification-service:
     tag: "2.2.13"
 pipelinewatch-service:
   image:
-    tag: "pipelinewatch-2.2.7"
+    tag: "2.2.9"
 upload-service:
   image:
     tag: "upload-2.2.19"
