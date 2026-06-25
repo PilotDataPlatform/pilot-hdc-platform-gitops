@@ -29,7 +29,7 @@ download-service:
     tag: "download-2.2.21"
 approval-service:
   image:
-    tag: "2.2.9"
+    tag: "2.2.12"
 metadata-event-handler:
   image:
     tag: "metadata_event_handler-1.0.9"
