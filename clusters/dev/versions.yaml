@@ -41,7 +41,7 @@ search-service:
     tag: "2.2.10"
 audit-trail-service:
   image:
-    tag: "audit-trail-2.2.10"
+    tag: "audit-trail-2.2.11"
 bff-cli-service:
   image:
     tag: "2.2.17"
