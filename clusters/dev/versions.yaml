@@ -44,7 +44,7 @@ audit-trail-service:
     tag: "audit-trail-2.2.10"
 bff-cli-service:
   image:
-    tag: "bff-cli-2.2.15"
+    tag: "2.2.17"
 workspace-service:
   image:
     tag: "2.2.7"
