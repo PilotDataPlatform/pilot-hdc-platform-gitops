@@ -8,7 +8,7 @@ auth-service:
     tag: "2.2.39"
 metadata-service:
   image:
-    tag: "2.2.13"
+    tag: "2.2.16"
 project-service:
   image:
     tag: "2.3.9"
