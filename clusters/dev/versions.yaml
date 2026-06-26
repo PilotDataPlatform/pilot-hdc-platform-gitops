@@ -23,7 +23,7 @@ pipelinewatch-service:
     tag: "2.2.9"
 upload-service:
   image:
-    tag: "upload-2.2.19"
+    tag: "upload-2.2.20"
 download-service:
   image:
     tag: "download-2.2.22"
