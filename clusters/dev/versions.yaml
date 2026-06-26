@@ -26,7 +26,7 @@ upload-service:
     tag: "upload-2.2.19"
 download-service:
   image:
-    tag: "download-2.2.21"
+    tag: "download-2.2.22"
 approval-service:
   image:
     tag: "2.2.12"
